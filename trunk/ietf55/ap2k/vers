@@ -1,0 +1,29 @@
+#!/usr/bin/perl
+#
+# should do SNMP natively
+use Data::Dumper;
+
+open(SNMP, "snmpwalk $ARGV[0] nokia oriSystemInvMgmtComponentTable |");
+while (<SNMP>) {
+	chop;
+	if (/.*Component([^\.]+)\.(\d+) = (.*)/) {
+		$oid = $1;
+		$index = $2;
+		$value = $3;
+		$value{$index}{$oid} = $value;
+	}
+}
+foreach $index (sort { $a <=> $b } keys %value) {
+	print $value{$index}{'Name'}, " Id ", $value{$index}{'Id'}, " Variant ", $value{$index}{'Variant'};
+	print " Version ", join(".", $value{$index}{'ReleaseVersion'}, $value{$index}{'MajorVersion'}, $value{$index}{'MinorVersion'}), "\n";
+#          'SerialNumber' => 'Card Not Present',
+#          'MinorVersion' => '0',
+#          'ReleaseVersion' => '0',
+#          'Id' => '0',
+#          'MajorVersion' => '0',
+#          'Index' => '9',
+#          'Variant' => '0',
+#          'Name' => 'Wireless Card B-PRI Firmware'
+#
+#	print Dumper($value{$_});
+}
