@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+#
+# Create a subject line from snmptrap output.
+# snmptrap output:
+# - hostname
+# - IP address
+# - sysuptime
+# - trap name
+# - more variables
+#
+# Output:
+# Email to @ARGV
+# Subject: Trap from ipaddress trap name
+#
+# all variables
+#
+# $Id$
+#
+$hostname = <STDIN>;
+chop($hostname);
+$ipaddr = <STDIN>;
+chop($ipaddr);
+while (<STDIN>) {
+	chop;
+	($oid, $value) = split(/\s+/, $_, 2);
+	push (@trapoid, $oid);
+	push (@trapvalue, $value);
+	$value{$oid} = $value;
+}
+close(STDIN);
+open(SENDMAIL, "|/usr/sbin/sendmail -t");
+print SENDMAIL "To: " . join(",", @ARGV), "\n";
+print SENDMAIL "Subject: Trap from $ipaddr ($hostname) - ";
+print SENDMAIL $value{"SNMPv2-MIB::snmpTrapOID.0"} || "??";
+print SENDMAIL "\n\n";
+print SENDMAIL $hostname, "\n", $ipaddr, "\n";
+for ($i = 0; $i <= $#trapoid; $i++) {
+	print SENDMAIL $trapoid [$i], " ", $trapvalue[$i], "\n";
+}
+close(SENDMAIL);
+
