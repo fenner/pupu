@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+#
+# Post the right form results to the access point named
+# on the command line to set noc0 as the trap receiver.
+#
+# $Id$
+#
+use LWP;
+
+$ver = "0.1";
+
+$dst = $ARGV[0];
+
+my $ua = new LWP::UserAgent;
+$ua->agent("Fenner-settrap/$ver " . $ua->agent);
+
+$ua->credentials("${dst}:80", "Access-Product", "", "nokia7210");
+
+my $req = new HTTP::Request POST => "http://${dst}:80/cfg/addedit/traphost-add.html/add";
+$req->content_type('application/x-www-form-urlencoded');
+$req->content("EmWeb_ns:snmp:41.0.*s=204.42.64.2&EmWeb_ns:snmp:42.0.*s=trap&EmWeb_ns:snmp:43.0.*s=noc0");
+$req->authorization_basic("", "nokia7210");
+
+my $res = $ua->request($req);
+if ($res->is_success) {
+	print $res->content, "\n";
+} else {
+	print "failure\n";
+	print $res->error_as_HTML;
+	print $res->content;
+}
+
