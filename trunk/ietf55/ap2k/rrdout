@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+#<!--
+#The most confusing here is the CDEF for uptime2 and reboot.
+#uptime2 is uptime with unknown values replaced by the previous
+#value, to make things easier for reboot.
+#reboot is 0 unless uptime2 < prev(uptime2), in which case it's INF.
+#
+#I'd like to use CF "LAST" for uptime, but the only RRA is AVERAGE.
+#
+#-->
+#
+# I don't know why the reboot is sometimes infininte at the end
+#
+for (1..36) {
+$ap=sprintf("%02d", $_);
+print qq`<RRD::GRAPH /usr/local/www/data/ap/images/ap${ap}.png
+--imginfo '<IMG SRC="/ap/images/%s" WIDTH=%lu HEIGHT=%lu >'
+--start -1d --end now --imgformat PNG --lazy
+--upper-limit=12000000 --rigid
+--title=AP${ap}
+DEF:in1=/usr/local/netviewer/data/ietf55-ap-${ap}/ietf55-ap-${ap}.IF.127.0.1.10.rrd:ifInOctets:AVERAGE
+DEF:out1=/usr/local/netviewer/data/ietf55-ap-${ap}/ietf55-ap-${ap}.IF.127.0.1.10.rrd:ifOutOctets:AVERAGE
+DEF:in2=/usr/local/netviewer/data/ietf55-ap-${ap}/ietf55-ap-${ap}.IF.127.0.2.10.rrd:ifInOctets:AVERAGE
+DEF:out2=/usr/local/netviewer/data/ietf55-ap-${ap}/ietf55-ap-${ap}.IF.127.0.2.10.rrd:ifOutOctets:AVERAGE
+DEF:uptime=/usr/local/netviewer/data/ietf55-ap-${ap}/ietf55-ap-${ap}.UpTime.0.rrd:sysUpTime:AVERAGE
+CDEF:uptime2=uptime,UN,PREV,UN,0,PREV,IF,uptime,IF
+CDEF:reboot=PREV(uptime2),UN,0,uptime2,PREV(uptime2),LE,-1,INF,IF,IF   
+CDEF:in=in1,in2,+
+CDEF:out=out1,out2,+
+AREA:reboot#ff0000:Reboot
+LINE1:in#00ff00:Input
+LINE1:out#0000ff:Output
+>
+`;
+}
