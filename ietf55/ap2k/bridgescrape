@@ -15,7 +15,7 @@ $dst = $ARGV[0];
 $ua = new LWP::UserAgent;
 $ua->agent("bridgescrape/$ver " . $ua->agent);
 
-$ua->credentials("${dst}:80", "Access-Product", "", "httppassword");
+$ua->credentials("${dst}:80", "Access-Product", "", "nokia7210");
 
 my $req = new HTTP::Request GET => "http://${dst}:80/mon/learn.html";
 
