@@ -61,9 +61,14 @@ echo ''
 
 cd /var/dns
 
-#zones='fee.example fie.example foe.example fum.example'
-zones=''
-echo 'no zones set yet for dynamic update freeze!'
+zones='ietf55.ops.ietf.org 64.42.204.in-addr.arpa 65.42.204.in-addr.arpa 66.42.204.in-addr.arpa 67.42.204.in-addr.arpa 68.42.204.in-addr.arpa 69.42.204.in-addr.arpa 70.42.204.in-addr.arpa 71.42.204.in-addr.arpa 72.42.204.in-addr.arpa 73.42.204.in-addr.arpa 74.42.204.in-addr.arpa 75.42.204.in-addr.arpa 76.42.204.in-addr.arpa 77.42.204.in-addr.arpa 78.42.204.in-addr.arpa 79.42.204.in-addr.arpa'
+
+# zones that are not dynamic (at least not for the moment)
+#48.238.205.in-addr.arpa
+#f.f.5.0.0.4.2.0.1.0.0.2.ip6.arpa
+#f.f.5.0.0.4.2.0.1.0.0.2.ip6.int
+#a.0.0.0.8.1.4.0.1.0.0.2.ip6.arpa
+#a.0.0.0.8.1.4.0.1.0.0.2.ip6.int
 
 echo 'freezing dynamic zones'
 /usr/bin/ssh -n $host "test -d ${dest}${PWD} || mkdir -p ${dest}${PWD}"
