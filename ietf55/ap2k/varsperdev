@@ -7,6 +7,9 @@
 # i.e. access point name, tab, expected values in the order of the
 # vars line.
 #
+# If a value is specified in multiple files, the expected value is first
+# taken from the per-AP, then from the per-group, then from the varlist.
+#
 # $Id$
 #
 vars	oriWirelessIfChannel.3

@@ -1,0 +1,16 @@
+#
+# Per-Group variables file.
+# First line must be "vars(<tab><OID>)*"
+# i.e. tab-seperated list of OIDs, the OIDs must be in the
+# varlist file with an empty expected value.
+# Rest of the file is "<group name>(<tab><expected-value>)*"
+# i.e. group name, tab, expected values in the order of the
+# vars line.
+#
+# If a value is specified in multiple files, the expected value is first
+# taken from the per-AP, then from the per-group, then from the varlist.
+#
+# $Id$
+#
+vars	oriWirelessIfMulticastRate.3	oriWirelessIfDistancebetweenAPs.3
+garden	oneMegabitPerSecond	large

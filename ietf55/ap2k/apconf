@@ -15,7 +15,7 @@ open(APLIST, "aplist") || die "aplist: $!\n";
 while (<APLIST>) {
 	next if (/^#/ || /^\s*$/);
 	chop;
-	($ap, $community) = split(/\t/);
+	($ap, $community, $wrcommunity, $group) = split(/\t/);
 	if ($ap eq "default") {
 		$defcomm = $community;
 		next;
@@ -23,6 +23,7 @@ while (<APLIST>) {
 	next if ($ap eq "write");
 	push(@aplist, $ap);
 	$community{$ap} = $community || $defcomm;
+	$group{$ap} = $group || "default";
 }
 close(APLIST);
 
@@ -53,6 +54,24 @@ if (open(VARSPERDEV, "varsperdev")) {
 	close(VARSPERDEV);
 } else {
 	warn("varsperdev: $!\n");
+}
+
+if (open(VARSPERGROUP, "varspergroup")) {
+	while (<VARSPERGROUP>) {
+		next if (/^#/ || /^\s*$/);
+		chop;
+		($ap, @vars) = split(/\t/);
+		if ($ap eq "vars") {
+			@customvars = @vars;
+			next;
+		}
+		for ($i = 0; $i <= $#customvars; $i++) {
+			$groupspecific{$ap.$customvars[$i]} = $vars[$i];
+		}
+	}
+	close(VARSPERGROUP);
+} else {
+	warn("varspergroup: $!\n");
 }
 
 if (@ARGV) {
@@ -101,7 +120,7 @@ foreach $ap (@aplist) {
 		$val = $snmp->get($var);
 		$val = "<i>timeout</i>" if (!defined($val));
 		print "<td align=center>";
-		$expected = $expectedval{$var} || $apspecific{$ap.$var};
+		$expected = $apspecific{$ap.$var} || $groupspecific{$group{$ap}.$var} || $expectedval{$var};
 		if ($expected) {
 			if ($expected =~ m|^/|) {
 				$re = $expected;

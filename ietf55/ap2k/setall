@@ -10,11 +10,19 @@
 #
 # $Id$
 #
+
+# I hate arg parsing.  There's got to be a better way than
+# using a vintage-1992 .pl .
+require 'getopt.pl';
+
+do Getopt('g');
+$which = $opt_g || "all";
+
 open(APLIST, "aplist") || die "aplist: $!\n";
 while (<APLIST>) {
 	chop;
 	next if (/^#/ || /^\s*$/);
-	($ap, $readcommunity, $writecommunity) = split(/\t/);
+	($ap, $readcommunity, $writecommunity, $group) = split(/\t/);
 	if ($ap eq "write") {
 		$defcomm = $readcommunity;
 		next;
@@ -22,6 +30,7 @@ while (<APLIST>) {
 	next if ($ap eq "default");
 	push(@aplist, $ap);
 	$community{$ap} = $writecommunity || $defcomm;
+	$group{$ap} = $group || "default";
 }
 close(APLIST);
 
@@ -29,8 +38,9 @@ close(APLIST);
 $ENV{'MIBS'}='./orinoco.mib';
 
 $args = join(" ", @ARGV);
-print "Setting $args on all access points...\n";
+print "Setting $args on $which access points...\n";
 foreach $ap (@aplist) {
+	next if ($which ne "all" && $which ne $group{$ap});
 	print "$ap: ";
 	system("snmpset -OS $ap $community{$ap} $args");
 }

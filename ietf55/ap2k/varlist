@@ -7,7 +7,11 @@
 # exactly, or a regexp surrounded by slashes, in which case the
 # regexp must match.  "expected value" may be empty (i.e. <tab><tab>),
 # in which case the value is either informational only, or is
-# a per-device value which is stored in the varsperdev file.
+# a per-device value which is stored in the varsperdev file
+# or a per-group value which is stored in the varspergroup file.
+#
+# If a value is specified in multiple files, the expected value is first
+# taken from the per-AP, then from the per-group, then from the varlist.
 #
 # $Id$
 #

@@ -1,7 +1,8 @@
 #!/bin/sh
 #
 # Reboot every base station.
+# (or a group, with -g)
 #
 # $Id$
 #
-./setall oriSystemReboot.0 i 1
+./setall $* oriSystemReboot.0 i 1

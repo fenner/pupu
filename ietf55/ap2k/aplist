@@ -4,18 +4,20 @@
 # TAB-seperated columns
 # default<tab>rocommunity
 # write<tab>rwcommunity
-# IP address<tab>rocommunity<tab>rwcommunity
+# IP address<tab>rocommunity<tab>rwcommunity<tab>group
+#
+# If group is not specified, it is "default".
 #
 # $Id$
 #
 default	nokia
 write	nokia7210
 204.42.64.10
-204.42.64.11
+204.42.64.11			garden
 204.42.64.12
-204.42.64.13
-204.42.64.14
-204.42.64.15
+204.42.64.13			garden
+204.42.64.14			garden
+204.42.64.15			garden
 204.42.64.16
 204.42.64.17
 204.42.64.18
