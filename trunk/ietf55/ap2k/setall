@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+#
+# Set the same variable to the same value on every
+# base station.  Arguments are the same as
+# "snmpset".
+#
+# This is kind of cheesy, since we have a perl SNMP
+# but we want to reuse the command-line parser
+# of "snmpset" so we cheese out.
+#
+# $Id$
+#
+open(APLIST, "aplist") || die "aplist: $!\n";
+while (<APLIST>) {
+	chop;
+	next if (/^#/ || /^\s*$/);
+	($ap, $readcommunity, $writecommunity) = split(/\t/);
+	if ($ap eq "write") {
+		$defcomm = $readcommunity;
+		next;
+	}
+	next if ($ap eq "default");
+	push(@aplist, $ap);
+	$community{$ap} = $writecommunity || $defcomm;
+}
+close(APLIST);
+
+# make sure the orinoco-mib is in scope
+$ENV{'MIBS'}='./orinoco.mib';
+
+$args = join(" ", @ARGV);
+print "Setting $args on all access points...\n";
+foreach $ap (@aplist) {
+	print "$ap: ";
+	system("snmpset -OS $ap $community{$ap} $args");
+}

@@ -1,0 +1,150 @@
+#!/usr/bin/perl
+#
+# $Id$
+#
+use SNMP;
+use Data::Dumper;
+ 
+SNMP::initMib();
+SNMP::addMibFiles("orinoco.mib");
+
+# want to see output as it happens
+$|=1;
+
+open(APLIST, "aplist") || die "aplist: $!\n";
+while (<APLIST>) {
+	next if (/^#/ || /^\s*$/);
+	chop;
+	($ap, $community) = split(/\t/);
+	if ($ap eq "default") {
+		$defcomm = $community;
+		next;
+	}
+	next if ($ap eq "write");
+	push(@aplist, $ap);
+	$community{$ap} = $community || $defcomm;
+}
+close(APLIST);
+
+open(VARLIST, "varlist") || die "varlist: $!\n";
+while (<VARLIST>) {
+	next if (/^#/ || /^\s*$/);
+	chop;
+	($var, $expectedval, $descr) = split(/\t/);
+	push (@varlist, $var);
+	$expectedval{$var} = $expectedval;
+	$descr{$var} = $descr;
+}
+close(VARLIST);
+
+if (open(VARSPERDEV, "varsperdev")) {
+	while (<VARSPERDEV>) {
+		next if (/^#/ || /^\s*$/);
+		chop;
+		($ap, @vars) = split(/\t/);
+		if ($ap eq "vars") {
+			@customvars = @vars;
+			next;
+		}
+		for ($i = 0; $i <= $#customvars; $i++) {
+			$apspecific{$ap.$customvars[$i]} = $vars[$i];
+		}
+	}
+	close(VARSPERDEV);
+} else {
+	warn("varsperdev: $!\n");
+}
+
+if (@ARGV) {
+	@oldaplist = @aplist;
+	@aplist = ();
+	foreach $arg (@ARGV) {
+		if (defined($community{$arg})) {
+			push (@aplist, $arg);
+		} else {
+			warn "${arg}: unknown access point\n";
+		}
+	}
+}
+
+print qq`<html>
+<head>
+<title>Access Point Configuration Matrix</title>
+</head>
+<body bgcolor="white">
+<h1>Access Point Configuration Matrix</h1>
+<p>
+This table generated at `, scalar(localtime(time)), qq`.
+<p>
+Each access point has a row; the columns are the variables being
+monitored.  Black text means the column is just informational;
+green means it's consistent with the desired variable and red
+means it's inconsistent.  At the <a href="#variables">bottom of this page</a>
+is a list of the variables being monitored.
+`;
+print "<table border>\n";
+print "<tr><th>Access Point</th>\n";
+foreach $var (@varlist) {
+	print "<th>", $descr{$var} || $var, "</th>\n";
+}
+print "</tr>\n";
+foreach $ap (@aplist) {
+	print "<tr><td>$ap</td>\n";
+	$snmp = new SNMP::Session(DestHost => $ap, Community => $community{$ap}, UseEnums => 1);
+	# "ping" so if it's unreachable we don't time out for each variable
+	$test = $snmp->get("sysDescr.0");
+	if (!defined($test)) {
+		print "<td colspan=", scalar(@varlist), "><i>timeout</i></td></tr>\n";
+		next;
+	}
+	foreach $var (@varlist) {
+		$val = $snmp->get($var);
+		$val = "<i>timeout</i>" if (!defined($val));
+		print "<td align=center>";
+		$expected = $expectedval{$var} || $apspecific{$ap.$var};
+		if ($expected) {
+			if ($expected =~ m|^/|) {
+				$re = $expected;
+				$re =~ s|^/||;
+				$re =~ s|/$||;
+				$match = $val =~ $re;
+			} else {
+				$match = $val eq $expected;
+			}
+			if ($match == 0) {
+				print "<font color=\"red\">";
+				print "want $expected -- got ";
+			} else {
+				print "<font color=\"green\">";
+			}
+		}
+		print $val;
+		print "</font>" if ($expected);
+		print "</td>\n";
+	}
+	print "</tr>\n";
+}
+print "</table>\n";
+print "<a name=\"variables\">\n";
+print "<table border>\n";
+print "<tr><th>Variable Name</th><th>Expected Value</th><th>OID</th></tr>\n";
+foreach $var (@varlist) {
+	print "<tr><td>";
+	print $descr{$var} || $var;
+	print "</td>\n<td>";
+	print $expectedval{$var} || "<i>none</i>";
+	print "</td>\n<td>";
+	print $var;
+	print "</td></tr>\n";
+}
+print "</table>\n";
+
+print qq`
+<p>
+<div style="background-color: #414196; color: white; border-style: groove">
+<img style="float: right" src="palmtree.jpg" alt="[Palm Tree]">
+(Peggy says that no web page is complete without a palm tree...)
+<div style="clear: both"></div>
+</div>
+`;
+print "</body></html>\n";

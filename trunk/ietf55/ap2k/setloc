@@ -1,0 +1,10 @@
+#!/bin/sh
+#
+# Set access point sysLocation.
+# XXX Assumes community.
+#
+# $Id$
+#
+ap=$1
+shift
+snmpset $ap nokia7210 sysLocation.0 s "$*"

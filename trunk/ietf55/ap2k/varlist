@@ -1,0 +1,27 @@
+#
+# Monitored variable list
+# TAB seperated
+# Format:
+# OID<tab>expected value<tab>Pretty name
+# The expected value can be a string, in which case it must match
+# exactly, or a regexp surrounded by slashes, in which case the
+# regexp must match.  "expected value" may be empty (i.e. <tab><tab>),
+# in which case the value is either informational only, or is
+# a per-device value which is stored in the varsperdev file.
+#
+# $Id$
+#
+oriWirelessIfChannel.3		Wireless Channel
+sysName.0		System Name
+sysLocation.0		System Location
+sysDescr.0	/^ AP-2000 v2.0.3\(303\)/	Software Version
+sysContact.0	Bob Hinden	Contact
+oriWirelessIfNetworkName.3	IETF55	Network Name
+oriWirelessIfClosedSystem.3	disable	Closed System
+oriWirelessIfAutoChannelSelectStatus.3	disable	Auto Channel Select
+oriWirelessIfEncryptionStatus.3	disable	WEP
+oriNetworkIPConfigSubnetMask.1	255.255.240.0	Subnet Mask
+oriNetworkIPDefaultRouterIPAddress.0	204.42.64.1	Default Router
+oriNetworkIPAddressType.0	static	Dynamic IP?
+oriWirelessIfMulticastRate.3	twoMegabitsPerSecond	Multicast Rate
+oriWirelessIfDistancebetweenAPs.3	small	Distance Between APs

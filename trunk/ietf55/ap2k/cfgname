@@ -1,0 +1,11 @@
+#!/usr/bin/perl
+#
+# Print the name of the config file from the access point address.
+#
+# $Id$
+#
+use Digest::MD5 qw(md5_hex);
+ 
+foreach $ap (@ARGV) {
+	print "${ap}: config-" . md5_hex("obfuscation" . $ap), "\n";
+}

@@ -1,0 +1,134 @@
+#!/usr/bin/perl
+#
+# Upload config file to an AP2000.
+# Reboot access point afterwards.
+#
+# $Id$
+#
+use SNMP;
+use Digest::MD5 qw(md5_hex);
+use Data::Dumper;
+ 
+SNMP::initMib();
+SNMP::addMibFiles("orinoco.mib");
+
+$tftpboot = "/usr/home/fenner/tftpboot/";
+
+open(APLIST, "aplist") || die "aplist: $!\n";
+while (<APLIST>) {
+	next if (/^#/ || /^\s*$/);
+	chop;
+	($ap, $readcommunity, $writecommunity) = split(/\t/);
+	if ($ap eq "write") {
+		$defcomm = $readcommunity;
+		next;
+	}
+	next if ($ap eq "default");
+	push(@aplist, $ap);
+	$community{$ap} = $writecommunity || $defcomm;
+}
+close(APLIST);
+
+foreach $ap (@ARGV) {
+	if (!defined($community{$ap})) {
+		warn "$ap: unknown access point\n";
+	}
+	$community = $community{$ap} || $defcomm;
+	$snmp{$ap} = new SNMP::Session(DestHost => $ap, Community => $community, UseEnums => 1);
+	# "ping" so if it's unreachable we don't time out for each variable
+	$test = $snmp{$ap}->get("sysDescr.0");
+	if (!defined($test)) {
+		warn "$ap: timed out\n";
+		next;
+	}
+	$oldver{$ap} = $test;
+	$filename = "config-" . md5_hex("obfuscation" . $ap);
+	if (! -f $tftpboot . $filename) {
+		print "${ap}: $filename doesn't exist in $tftpboot\n";
+		delete $oldver{$ap};
+		next;
+	}
+	$request = new SNMP::VarList(
+	 new SNMP::Varbind(['oriTFTPServerIPAddress','0','204.42.64.2','IPADDR']),
+	 new SNMP::Varbind(['oriTFTPFileName','0',$filename,'OCTETSTR']),
+	 new SNMP::Varbind(['oriTFTPFileType','0','config','INTEGER']),
+	 new SNMP::Varbind(['oriTFTPOperation','0','downloadAndReboot','INTEGER'])
+	 );
+	$setret = $snmp{$ap}->set($request);
+	if (!defined($setret)) {
+		print "${ap}: set failed\n";
+		delete $oldver{$ap};
+	} else {
+		print "${ap}: tftp initiated\n";
+	}
+}
+# Now we wait.
+# Try getting the version string for each AP, presumably that'll be
+# when the AP has rebooted.
+#
+# Entries in the %oldver array are who haven't finished yet.
+print "Waiting for tftp to complete...\n";
+while (1) {
+	$outstanding = 0;
+	$wastimeout = 0;
+	foreach $ap (keys %oldver) {
+		$outstanding++;
+		if ($state{$ap}) {
+			$snmp{$ap}->get('sysDescr.0', [ \&descrcallback, $ap ]);
+		} else {
+			$snmp{$ap}->get('oriTFTPOperationStatus.0', [ \&tftpcallback, $ap ]);
+		}
+	}
+	if ($outstanding == 0) {
+		last;
+	}
+	SNMP::MainLoop();	# doesn't return until someone calls finish
+	sleep(1) unless ($wastimeout);
+}
+
+sub descrcallback($$) {
+	my($ap) = shift;
+	my($varlist) = shift;
+
+	$outstanding--;
+	if (!defined($varlist)) {
+		# timeout.  Keeeep going!
+		$wastimeout = 1;
+	} else {
+		print "${ap}: reboot complete.\n";
+		delete $oldver{$ap};
+	}
+	if ($outstanding == 0) {
+		SNMP::finish();
+	}
+}
+
+sub tftpcallback($$) {
+	my($ap) = shift;
+	my($varlist) = shift;
+
+	$outstanding--;
+	if (!defined($varlist)) {
+		# timeout.  AP must be rebooting now.
+		print "${ap}: rebooting...\n";
+		$state{$ap} = 1;
+		$wastimeout = 1;
+	} else {
+		my($state) =  ${${$varlist}[0]}[2];
+		if ($state =~ /^\d+$/) {
+			# I turned on enum mapping in the session creation,
+			# but it doesn't seem to always work.
+			$state = SNMP::mapEnum(${$varlist}[0]);
+		}
+		if ($state ne $laststate{$ap}) {
+			$laststate{$ap} = $state;
+			print "${ap}: tftp $state\n";
+		}
+		if ($state ne "inProgress" && $state ne "successful") {
+			delete $oldver{$ap};
+		}
+	}
+	if ($outstanding == 0) {
+		SNMP::finish();
+	}
+}

@@ -1,0 +1,49 @@
+#
+# Per-Device variables file.
+# First line must be "vars(<tab><OID>)*"
+# i.e. tab-seperated list of OIDs, the OIDs must be in the
+# varlist file with an empty expected value.
+# Rest of the file is "<access-point address>(<tab><expected-value>)*"
+# i.e. access point name, tab, expected values in the order of the
+# vars line.
+#
+# $Id$
+#
+vars	oriWirelessIfChannel.3
+204.42.64.10	11
+204.42.64.11	11
+204.42.64.12
+204.42.64.13	6
+204.42.64.14	1
+204.42.64.15	1
+204.42.64.16	6
+204.42.64.17	11
+204.42.64.18	1
+204.42.64.19	6
+204.42.64.20
+204.42.64.21
+204.42.64.22
+204.42.64.23
+204.42.64.24
+204.42.64.25
+204.42.64.26
+204.42.64.27
+204.42.64.28
+204.42.64.29
+204.42.64.30
+204.42.64.31
+204.42.64.32
+204.42.64.33
+204.42.64.34
+204.42.64.35
+204.42.64.36	11
+204.42.64.37
+204.42.64.38
+204.42.64.39
+204.42.64.40
+204.42.64.41
+204.42.64.42
+204.42.64.43
+204.42.64.44
+204.42.64.45
+204.42.64.46
