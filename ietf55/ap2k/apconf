@@ -44,11 +44,11 @@ if (open(VARSPERDEV, "varsperdev")) {
 		chop;
 		($ap, @vars) = split(/\t/);
 		if ($ap eq "vars") {
-			@customvars = @vars;
+			@customapvars = @vars;
 			next;
 		}
-		for ($i = 0; $i <= $#customvars; $i++) {
-			$apspecific{$ap.$customvars[$i]} = $vars[$i];
+		for ($i = 0; $i <= $#customapvars; $i++) {
+			$apspecific{$ap.$customapvars[$i]} = $vars[$i];
 		}
 	}
 	close(VARSPERDEV);
@@ -60,14 +60,15 @@ if (open(VARSPERGROUP, "varspergroup")) {
 	while (<VARSPERGROUP>) {
 		next if (/^#/ || /^\s*$/);
 		chop;
-		($ap, @vars) = split(/\t/);
-		if ($ap eq "vars") {
-			@customvars = @vars;
+		($group, @vars) = split(/\t/);
+		if ($group eq "vars") {
+			@customgroupvars = @vars;
 			next;
 		}
-		for ($i = 0; $i <= $#customvars; $i++) {
-			$groupspecific{$ap.$customvars[$i]} = $vars[$i];
+		for ($i = 0; $i <= $#customgroupvars; $i++) {
+			$groupspecific{$group.$customgroupvars[$i]} = $vars[$i];
 		}
+		push(@grouplist, $group);
 	}
 	close(VARSPERGROUP);
 } else {
@@ -119,14 +120,23 @@ foreach $ap (@aplist) {
 	foreach $var (@varlist) {
 		$val = $snmp->get($var);
 		$val = "<i>timeout</i>" if (!defined($val));
+		($noinstance = $var) =~ s/\.\d+$//;
+		print "<!-- $var " . SNMP::getType($noinstance) . " -->\n";
+		# sigh, getType doesn't help.
+		# Everything's an OCTETSTR.
+		if ($noinstance eq 'ifPhysAddress') {
+			$val = join(":", grep(($_ = sprintf("%x", $_), 1), unpack("C*", $val)));
+		}
 		print "<td align=center>";
 		$expected = $apspecific{$ap.$var} || $groupspecific{$group{$ap}.$var} || $expectedval{$var};
 		if ($expected) {
-			if ($expected =~ m|^/|) {
+			if ($expected =~ m|^(!)?/|) {
+				$wasbang = $1;
 				$re = $expected;
-				$re =~ s|^/||;
+				$re =~ s|^(!)?/||;
 				$re =~ s|/$||;
 				$match = $val =~ $re;
+				$match = !$match if ($wasbang);
 			} else {
 				$match = $val eq $expected;
 			}
@@ -155,6 +165,33 @@ foreach $var (@varlist) {
 	print "</td>\n<td>";
 	print $var;
 	print "</td></tr>\n";
+}
+print "</table>\n";
+print "<p>Per-Group variables:\n";
+print "<table border>\n";
+print "<tr><th>Group Name</th>";
+print "<th>", join("</th>\n<th>", @customgroupvars), "</th></tr>\n";
+foreach $group (@grouplist) {
+	print "<tr>";
+	print "<td>$group</td>\n";
+	foreach $var (@customgroupvars) {
+		print "<td>", $groupspecific{$group.$var} || "&nbsp;", "</td>\n";
+	}
+	print "</tr>\n";
+}
+print "</table>\n";
+print "<p>Per-AP variables:\n";
+print "<table border>\n";
+print "<tr><th>AP Name</th>";
+print "<th>", join("</th>\n<th>", @customapvars), "</th></tr>\n";
+foreach $ap (@aplist) {
+	$row = "<tr><td>$ap</td>\n";
+	$gotsomething = 0;
+	foreach $var (@customapvars) {
+		$row .= "<td>" . ($apspecific{$ap.$var} || "&nbsp;") . "</td>\n";
+		$gotsomething = 1 if $apspecific{$ap.$var};
+	}
+	print $row, "</tr>\n" if ($gotsomething);
 }
 print "</table>\n";
 
