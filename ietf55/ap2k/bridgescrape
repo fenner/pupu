@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+#
+#
+# Download and screen-scrape the web page with the AP2000's
+# bridge table.
+#
+# $Id$
+#
+use LWP;
+
+$ver = "0.1";
+
+$dst = $ARGV[0];
+
+$ua = new LWP::UserAgent;
+$ua->agent("bridgescrape/$ver " . $ua->agent);
+
+$ua->credentials("${dst}:80", "Access-Product", "", "httppassword");
+
+my $req = new HTTP::Request GET => "http://${dst}:80/mon/learn.html";
+
+my $res = $ua->request($req);
+if ($res->is_success) {
+	# there's probably a better way, but why go to all that trouble?
+	$intable = 0;
+	foreach (split(/\n/, $res->content)) {
+		if (/Dump Contents Here/) {
+			$intable = 1;
+		}
+		next unless ($intable);
+		if (/End customized table/) {
+			last;
+		}
+		if (/<tr>/i) {
+			$tdnum = 0;
+			@data = ();
+		}
+		if (m|<td[^>]*>([^<]+)</td>|i) {
+			$data[$tdnum++] = $1;
+		}
+		if (m|</tr>|i) {
+			print join("\t", @data), "\n";
+		}
+	}
+} else {
+	print "failure\n";
+	print $res->error_as_HTML;
+	print $res->content;
+}

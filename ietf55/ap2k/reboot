@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Reboot an AP2000
+# XXX this script assumes the write SNMP password
+#
+# $Id$
+#
+snmpset $1 nokia7210 oriSystemReboot.0 i 1
