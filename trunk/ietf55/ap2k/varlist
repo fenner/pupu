@@ -15,9 +15,10 @@
 #
 # $Id$
 #
-oriWirelessIfChannel.3		Wireless Channel
+oriWirelessIfChannel.3	Per-AP value	Wireless Channel
 sysName.0		System Name
-sysLocation.0		System Location
+sysLocation.0	!/^IETF55/	System Location
+ifPhysAddress.3		Radio MAC Address
 sysDescr.0	/^ AP-2000 v2.0.3\(303\)/	Software Version
 sysContact.0	Bob Hinden	Contact
 oriWirelessIfNetworkName.3	IETF55	Network Name
@@ -29,3 +30,5 @@ oriNetworkIPDefaultRouterIPAddress.0	204.42.64.1	Default Router
 oriNetworkIPAddressType.0	static	Dynamic IP?
 oriWirelessIfMulticastRate.3	twoMegabitsPerSecond	Multicast Rate
 oriWirelessIfDistancebetweenAPs.3	small	Distance Between APs
+oriSNMPTrapHostTableIPAddress.1	204.42.64.2	Trap Receiver
+oriSecurityTrapsStatus.0	disable	Security Traps
