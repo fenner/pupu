@@ -12,5 +12,6 @@
 #
 # $Id$
 #
-vars	oriWirelessIfMulticastRate.3	oriWirelessIfDistancebetweenAPs.3
-garden	oneMegabitPerSecond	large
+vars	oriWirelessIfMulticastRate.3	oriWirelessIfDistancebetweenAPs.3	oriWirelessIfMulticastRate.4	oriWirelessIfDistancebetweenAPs.4
+garden	oneMegabitPerSecond	large	oneMegabitPerSecond	large
+medium	oneMegabitPerSecond	medium	oneMegabitPerSecond	medium
