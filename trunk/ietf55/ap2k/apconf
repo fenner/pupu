@@ -4,9 +4,18 @@
 #
 use SNMP;
 use Data::Dumper;
+#
+# command line parsing
+require 'getopt.pl';
+
+do Getopt('');	# no switches take arguments.  Just expect "-a" for autofix
+$do_autofix = $opt_a;
  
 SNMP::initMib();
 SNMP::addMibFiles("orinoco.mib");
+if ($opt_d) {
+	$SNMP::debugging = 1;
+}
 
 # want to see output as it happens
 $|=1;
@@ -15,14 +24,18 @@ open(APLIST, "aplist") || die "aplist: $!\n";
 while (<APLIST>) {
 	next if (/^#/ || /^\s*$/);
 	chop;
-	($ap, $community, $wrcommunity, $group) = split(/\t/);
+	($ap, $community, $wcommunity, $group) = split(/\t/);
 	if ($ap eq "default") {
 		$defcomm = $community;
 		next;
 	}
-	next if ($ap eq "write");
+	if ($ap eq "write") {
+		$defwcomm = $community;
+		next;
+	}
 	push(@aplist, $ap);
 	$community{$ap} = $community || $defcomm;
+	$wcommunity{$ap} = $wcommunity || $defwcomm;
 	$group{$ap} = $group || "default";
 }
 close(APLIST);
@@ -31,10 +44,11 @@ open(VARLIST, "varlist") || die "varlist: $!\n";
 while (<VARLIST>) {
 	next if (/^#/ || /^\s*$/);
 	chop;
-	($var, $expectedval, $descr) = split(/\t/);
+	($var, $expectedval, $descr, $autofix) = split(/\t/);
 	push (@varlist, $var);
 	$expectedval{$var} = $expectedval;
 	$descr{$var} = $descr;
+	$autofix{$var} = $autofix;
 }
 close(VARLIST);
 
@@ -110,6 +124,7 @@ foreach $var (@varlist) {
 print "</tr>\n";
 foreach $ap (@aplist) {
 	print "<tr><td>$ap</td>\n";
+	$snmpw = undef;
 	$snmp = new SNMP::Session(DestHost => $ap, Community => $community{$ap}, UseEnums => 1);
 	# "ping" so if it's unreachable we don't time out for each variable
 	$test = $snmp->get("sysDescr.0");
@@ -128,6 +143,9 @@ foreach $ap (@aplist) {
 			$val = join(":", grep(($_ = sprintf("%x", $_), 1), unpack("C*", $val)));
 		}
 		print "<td align=center>";
+		if ($snmp->{ErrorStr} =~ "noSuchName") {
+			print "&nbsp;";
+		} else {
 		$expected = $apspecific{$ap.$var} || $groupspecific{$group{$ap}.$var} || $expectedval{$var};
 		if ($expected) {
 			if ($expected =~ m|^(!)?/|) {
@@ -147,8 +165,25 @@ foreach $ap (@aplist) {
 				print "<font color=\"green\">";
 			}
 		}
-		print $val;
+		print (($snmp->{ErrorNum} == 0) ? $val : ("<i>", shorterror($snmp->{ErrorStr}), "</i>"));
 		print "</font>" if ($expected);
+		if ($do_autofix && $match == 0) {
+			if (!$expected || $expected =~ m|^(!)?/| || $autofix{$var} =~ /^n/i || $snmp->{ErrorNum}) {
+				print "-&gt; not fixed\n";
+			} else {
+				print "<br>I'd like to fix this\n";
+				if (!$snmpw) {
+					$snmpw = new SNMP::Session(DestHost => $ap, Community => $wcommunity{$ap}, UseEnums => 1);
+				}
+				$ret = $snmpw->set($var,$expected);
+				if (!defined($ret)) {
+					print "<br>set ($var, $expected) returned ", $snmpw->{ErrorStr};
+				} else {
+					print "<br>set returned ", $ret || "success";
+				}
+			}
+		}
+		}
 		print "</td>\n";
 	}
 	print "</tr>\n";
@@ -204,3 +239,12 @@ print qq`
 </div>
 `;
 print "</body></html>\n";
+
+sub shorterror($) {
+	my($errstr) = shift;
+
+	if ($errstr =~ /\(([^)]+)\)/) {
+		return $1;
+	}
+	return $errstr;
+}
