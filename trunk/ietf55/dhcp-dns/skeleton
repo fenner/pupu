@@ -1,0 +1,20 @@
+;-----------------------------------------------------------------------
+; $Header$
+; skeleton for one of far too many reverse zones for ietf55
+; nb: soa serial set by hand or by bind9 ddns
+;-----------------------------------------------------------------------
+
+$TTL	14400
+
+@	14400	IN SOA	srv0.ietf55.ops.ietf.org.	hostmaster.ietf55.ops.ietf.org. (
+			4			; serial
+			3600			; refresh every hour
+			1800			; retry every half hour
+			2592000			; expire in 30 days
+			345600 )		; default TTL of 4 days
+
+			NS	srv0.ietf55.ops.ietf.org.
+			NS	srv1.ietf55.ops.ietf.org.
+			NS	rip.psg.com.
+			NS	phloem.uoregon.edu.
+			NS	ns1.itojun.org.

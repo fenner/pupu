@@ -1,0 +1,44 @@
+;-----------------------------------------------------------------------
+; $Header$
+;
+; static portions of ietf55.ops.ietf.org zone.  not much here yet. 
+; nb: soa serial set by hand or by bind9 ddns.
+;-----------------------------------------------------------------------
+
+$TTL	14400
+
+@	14400	IN SOA	srv0	hostmaster (
+			4			; serial
+			3600			; refresh every hour
+			1800			; retry every half hour
+			2592000			; expire in 30 days
+			345600 )		; default TTL of 4 days
+
+			NS	srv0
+			NS	srv1
+			NS	rip.psg.com.
+			NS	phloem.uoregon.edu.
+			NS	ns1.itojun.org.
+
+			MX	1 srv0
+			MX	2 srv1
+
+srv0			A	128.223.83.215
+			MX	1 srv0
+			MX	2 srv1
+
+srv1			A	128.223.83.223
+			MX	2 srv0
+			MX	1 srv1
+
+noc0			A	128.223.83.235
+			MX	1 noc0
+			MX	2 srv0
+			MX	3 srv1
+
+noc1			A	128.223.83.220
+			MX	1 noc1
+			MX	2 srv0
+			MX	3 srv1
+
+bro0			A	128.223.83.221
