@@ -1,5 +1,5 @@
 ;-----------------------------------------------------------------------
-; $Header$
+; $Id$
 ;
 ; static portions of ietf55.ops.ietf.org zone.  not much here yet. 
 ; nb: soa serial set by hand or by bind9 ddns.

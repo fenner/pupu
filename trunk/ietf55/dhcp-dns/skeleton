@@ -1,5 +1,6 @@
 ;-----------------------------------------------------------------------
-; $Header$
+; $Id$
+;
 ; skeleton for one of far too many reverse zones for ietf55
 ; nb: soa serial set by hand or by bind9 ddns
 ;-----------------------------------------------------------------------
