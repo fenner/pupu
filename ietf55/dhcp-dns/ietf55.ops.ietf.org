@@ -8,7 +8,7 @@
 $TTL	14400
 
 @	14400	IN SOA	srv0	hostmaster (
-			4			; serial
+			5			; serial
 			3600			; refresh every hour
 			1800			; retry every half hour
 			2592000			; expire in 30 days
@@ -42,3 +42,5 @@ noc1			A	128.223.83.220
 			MX	3 srv1
 
 bro0			A	128.223.83.221
+
+www			CNAME	srv0
