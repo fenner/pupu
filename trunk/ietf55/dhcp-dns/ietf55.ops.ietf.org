@@ -8,7 +8,7 @@
 $TTL	14400
 
 @	14400	IN SOA	srv0	hostmaster (
-			5			; serial
+			6			; serial
 			3600			; refresh every hour
 			1800			; retry every half hour
 			2592000			; expire in 30 days
@@ -23,24 +23,39 @@ $TTL	14400
 			MX	1 srv0
 			MX	2 srv1
 
-srv0			A	128.223.83.215
+srv0			A	205.238.48.2
+			AAAA	2001:240:5ff:1::2
 			MX	1 srv0
 			MX	2 srv1
 
-srv1			A	128.223.83.223
+srv1			A	205.238.48.3
+			AAAA	2001:240:5ff:1::3
 			MX	2 srv0
 			MX	1 srv1
 
-noc0			A	128.223.83.235
+noc0			A	205.238.48.4
+			AAAA	2001:240:5ff:1::4
 			MX	1 noc0
 			MX	2 srv0
 			MX	3 srv1
 
-noc1			A	128.223.83.220
+noc1			A	205.238.48.5
+			AAAA	2001:240:5ff:1::5
 			MX	1 noc1
 			MX	2 srv0
 			MX	3 srv1
 
-bro0			A	128.223.83.221
+bro0			A	205.238.48.19
+			AAAA	2001:240:5ff:3::19
 
 www			CNAME	srv0
+
+rtr0			A	205.238.48.17
+			A	157.238.161.202
+			A	208.172.71.18
+
+rtr1			A	205.238.48.1
+			A	205.238.48.9
+			A	205.238.48.18
+			A	205.238.48.25
+			A	204.42.64.1
