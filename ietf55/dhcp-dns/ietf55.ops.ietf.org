@@ -1,61 +1,117 @@
-;-----------------------------------------------------------------------
-; $Id$
-;
-; static portions of ietf55.ops.ietf.org zone.  not much here yet. 
-; nb: soa serial set by hand or by bind9 ddns.
-;-----------------------------------------------------------------------
+;; $Id$
+;; static portions of ietf55.ops.ietf.org zone
+;; this zone has ddns running, so named has been fiddling with the content
+;; you have been warned...
 
-$TTL	14400
-
-@	14400	IN SOA	srv0	hostmaster (
-			6			; serial
-			3600			; refresh every hour
-			1800			; retry every half hour
-			2592000			; expire in 30 days
-			345600 )		; default TTL of 4 days
-
-			NS	srv0
-			NS	srv1
-			NS	rip.psg.com.
-			NS	phloem.uoregon.edu.
+$TTL 14400	; 4 hours
+@	IN SOA	srv0.ietf55.ops.ietf.org. hostmaster.ietf55.ops.ietf.org. (
+				204        ; serial
+				3600       ; refresh (1 hour)
+				1800       ; retry (30 minutes)
+				2592000    ; expire (4 weeks 2 days)
+				345600     ; minimum (4 days)
+				)
 			NS	ns1.itojun.org.
-
-			MX	1 srv0
-			MX	2 srv1
-
-srv0			A	205.238.48.2
-			AAAA	2001:240:5ff:1::2
-			MX	1 srv0
-			MX	2 srv1
-
-srv1			A	205.238.48.3
-			AAAA	2001:240:5ff:1::3
-			MX	2 srv0
-			MX	1 srv1
-
-noc0			A	205.238.48.4
-			AAAA	2001:240:5ff:1::4
+			NS	rip.psg.com.
+			NS	srv0.ietf55.ops.ietf.org.
+			NS	srv1.ietf55.ops.ietf.org.
+			NS	phloem.uoregon.edu.
+			MX	1 srv0.ietf55.ops.ietf.org.
+			MX	2 srv1.ietf55.ops.ietf.org.
+bro0			A	205.238.48.19
+			AAAA	2001:240:5ff:3::19
+ietf55-ap-01		A	204.42.64.10
+			TXT	"00:02:2D:48:57:CD"
+ietf55-ap-02		A	204.42.64.11
+			TXT	"00:02:2D:48:57:C8"
+ietf55-ap-03		A	204.42.64.12
+			TXT	"00:02:2D:47:55:80"
+ietf55-ap-04		A	204.42.64.13
+			TXT	"00:02:2D:47:55:91"
+ietf55-ap-05		A	204.42.64.14
+			TXT	"00:02:2D:48:57:CE"
+ietf55-ap-06		A	204.42.64.15
+			TXT	"00:02:2D:47:55:92"
+ietf55-ap-07		A	204.42.64.16
+			TXT	"00:02:2D:71:0A:82"
+ietf55-ap-08		A	204.42.64.17
+			TXT	"00:02:2D:72:0A:08"
+ietf55-ap-09		A	204.42.64.18
+			TXT	"00:02:2D:71:0A:67"
+ietf55-ap-10		A	204.42.64.19
+			TXT	"00:02:2D:47:55:8C"
+ietf55-ap-11		A	204.42.64.20
+			TXT	"00:02:2D:71:04:5A"
+ietf55-ap-12		A	204.42.64.21
+			TXT	"00:02:2D:72:0A:28"
+ietf55-ap-13		A	204.42.64.22
+			TXT	"00:02:2D:48:57:DF"
+ietf55-ap-14		A	204.42.64.23
+			TXT	"00:02:2D:48:57:DD"
+ietf55-ap-15		A	204.42.64.24
+			TXT	"00:02:2D:71:0A:5F"
+ietf55-ap-16		A	204.42.64.25
+			TXT	"00:02:2D:48:57:D0"
+ietf55-ap-17		A	204.42.64.26
+			TXT	"00:02:2D:48:57:D3"
+ietf55-ap-18		A	204.42.64.27
+			TXT	"00:02:2D:47:55:89"
+ietf55-ap-19		A	204.42.64.28
+			TXT	"00:02:2D:48:57:B0"
+ietf55-ap-20		A	204.42.64.29
+			TXT	"00:02:2D:71:0A:58"
+ietf55-ap-21		A	204.42.64.30
+			TXT	"00:02:2D:71:0A:80"
+ietf55-ap-22		A	204.42.64.31
+			TXT	"00:02:2D:72:0A:02"
+ietf55-ap-23		A	204.42.64.32
+			TXT	"00:02:2D:72:0A:23"
+ietf55-ap-24		A	204.42.64.33
+			TXT	"00:02:2D:71:0A:60"
+ietf55-ap-25		A	204.42.64.34
+			TXT	"00:02:2D:48:57:D7"
+ietf55-ap-26		A	204.42.64.35
+			TXT	"00:02:2D:48:57:C1"
+ietf55-ap-27		A	204.42.64.36
+			TXT	"00:02:2D:47:55:87"
+ietf55-ap-28		A	204.42.64.37
+			TXT	"00:02:2D:48:38:97"
+ietf55-ap-29		A	204.42.64.38
+			TXT	"00:02:2D:72:03:7A"
+ietf55-ap-30		A	204.42.64.39
+			TXT	"00:02:2D:47:55:61"
+ietf55-ap-31		A	204.42.64.40
+			TXT	"00:02:2D:48:49:B3"
+ietf55-ap-32		A	204.42.64.41
+			TXT	"Unknown"
+ietf55-ap-33		A	204.42.64.42
+			TXT	"Unknown"
+ietf55-ap-34		A	204.42.64.43
+			TXT	"Unknown"
+ietf55-ap-35		A	204.42.64.44
+			TXT	"Unknown"
+ietf55-ap-36		A	204.42.64.45
+			TXT	"Unknown"
+noc0			A	204.42.64.2
 			MX	1 noc0
 			MX	2 srv0
 			MX	3 srv1
-
-noc1			A	205.238.48.5
-			AAAA	2001:240:5ff:1::5
+			AAAA	2001:240:5ff::2
+noc1			A	204.42.64.3
 			MX	1 noc1
 			MX	2 srv0
 			MX	3 srv1
-
-bro0			A	205.238.48.19
-			AAAA	2001:240:5ff:3::19
-
+			AAAA	2001:240:5ff::3
+printer0		A	204.42.64.7
+printer1		A	204.42.64.8
+rtr0			A	205.238.48.255
+rtr1			A	205.238.48.254
+srv0			A	205.238.48.2
+			MX	1 srv0
+			MX	2 srv1
+			AAAA	2001:240:5ff:1::2
+srv1			A	205.238.48.3
+			MX	1 srv1
+			MX	2 srv0
+			AAAA	2001:240:5ff:1::3
 www			CNAME	srv0
-
-rtr0			A	205.238.48.17
-			A	157.238.161.202
-			A	208.172.71.18
-
-rtr1			A	205.238.48.1
-			A	205.238.48.9
-			A	205.238.48.18
-			A	205.238.48.25
-			A	204.42.64.1
