@@ -1,0 +1,8 @@
+#!/bin/sh
+#
+# Turn off auto-channel-select and set the channel of
+# base station $1 to channel $2
+#
+# $Id$
+#
+snmpset $1 nokia7210 oriWirelessIfAutoChannelSelectStatus.3 i disable oriWirelessIfChannel.3 i $2
