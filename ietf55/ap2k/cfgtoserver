@@ -28,6 +28,10 @@ while (<APLIST>) {
 }
 close(APLIST);
 
+if ($#ARGV == -1) {
+	@ARGV = @aplist;
+}
+
 foreach $ap (@ARGV) {
 	if (!defined($community{$ap})) {
 		warn "$ap: unknown access point\n";
