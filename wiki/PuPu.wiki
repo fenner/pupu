@@ -1,4 +1,5 @@
 #summary Permanently unfinished, Possibly useful
+#labels Featured
 
 = Ok, wtf? =
 
