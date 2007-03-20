@@ -1,0 +1,108 @@
+#!/usr/bin/perl
+#
+use CGI qw/:standard/;
+use GD;
+#XXX Get netdisco stuff.  This is why we want to be inside Mason :-(
+use lib '../..';	#XXX
+use netdisco;
+
+#XXX
+netdisco::config('../../netdisco.conf');
+
+my $width = param('width') || 1;
+my $height = param('height') || 1;
+my $map = param('map');
+my $user = param('username');
+my $debug = param('debug');
+
+my $colorlist = [
+	[   0*60, [   0, 255,   0 ] ],
+	[  15*60, [ 255, 255,   0 ] ],
+	[  60*60, [   0,   0, 255 ] ],
+	[ 120*60, [ 255,   0, 255 ] ],
+	[ 240*60, [ 255,   0,   0 ] ] ];
+
+print header(-type=>'image/png',-expires=>'+5m');
+
+my $img = GD::Image->new($width, $height, 0);	# indexed for small size
+
+my $white = $img->colorAllocate(255,255,255);
+my $red = $img->colorAllocate(255,0,0);
+my $black = $img->colorAllocate(0,0,0);
+$img->transparent($white);
+if ($user) {
+	foreach $color (@$colorlist) {
+		$color->[2] = $img->colorAllocate(@{$color->[1]});
+	}
+}
+
+# need 2nd one for ports, where node.switch = ip, node.port = port,
+#  useport = 1.
+if ($debug) {
+	$netdisco::SQLCARP = 1;
+}
+%where = ( 'device_port_location.ip' => \'node.switch',
+	   'device.ip' => \'node.switch',
+		'device_port_location.useport' => 0,
+		'device_port_location.image' => $map );
+my($groupadd) = "";
+my($columns) = ['count(node.switch) as num','x','y'];
+if ($user) {
+	my $macs = netdisco::sql_rows('user_mac', ['mac'], {'username' => $user});
+	my @maclist=();
+	foreach my $mac (@$macs) {
+		push(@maclist, $mac->{mac});
+	}
+	$where{'node.mac'} = [[@maclist]];
+	$groupadd = ",time_last order by time_last";
+	push (@$columns,'extract(epoch from time_last) as time_last');
+} else {
+	$where{'node.active'} = 't';
+	$where{'node.time_last'} = \\'> device.last_macsuck';
+}
+$rows = netdisco::sql_rows('node, device, device_port_location',
+		 $columns,
+		 \%where, undef,
+		'group by node.switch,x,y' . $groupadd);
+
+# Prepare for 2 passes: first draw red circles, then black outlines.
+# Do the calculation once, though.
+my @data = ();
+my $c = 2.30258509299405;	# log(10)
+foreach my $row (@$rows) {
+	my $x = $row->{x};
+	my $y = $row->{y};
+	my $val;
+
+	if ($user) {
+		$val = 10;
+	} else {
+		$val = int(10 + log($row->{num}) * 10 / $c);
+	}
+	if ($debug) {
+		use Data::Dumper;
+		print STDERR Dumper($row);
+	}
+
+	push(@data, [$x, $y, $val, $row->{time_last}]);
+}
+
+foreach my $point (@data) {
+	my $color = $red;
+	if ($user) {
+		my $diff = time - $point->[3];
+		my $colorit;
+		# pick color from point->[3]
+		foreach $colorit (@$colorlist) {
+			if ($diff > $colorit->[0]) {
+				$color = $colorit->[2];
+			}
+		}
+	}
+	$img->filledEllipse($point->[0], $point->[1], $point->[2], $point->[2], $color);
+}
+foreach my $point (@data) {
+	$img->ellipse($point->[0], $point->[1], $point->[2], $point->[2], $black);
+}
+
+print $img->png;

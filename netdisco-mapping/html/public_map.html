@@ -1,0 +1,134 @@
+% if (defined($user)) {
+<h3>User <%$user%> Location</h3>
+<%perl>
+my $macs = sql_rows('user_mac', ['mac'], {'username' => $user});
+my @maclist=();
+foreach my $mac (@$macs) {
+	push(@maclist, $mac->{mac});
+}
+#XXX copied from feed/dhandler, should share it
+my $ports = sql_rows('node',
+	    ['mac','switch','port','active','oui','extract(epoch from time_recent) as time_first', 'extract(epoch from time_last) as time_last'],
+	    {mac => [[@maclist]]},
+	    undef,
+	    'order by time_last desc limit 10'
+	    );
+# for efficiency: build up a set of 'ip', and use a single sql_rows()
+#  to get all of them.
+my %ipuniq = ();
+foreach my $port (@$ports) {
+  $ipuniq{$port->{switch}} = 1;
+}
+#XXX could really use a variant of sql_column that returns hash refs for
+#  multiple returns
+my $nameret = sql_rows('device', ['ip','dns','name','location'], {'ip' => [[keys %ipuniq]]});
+my %namemap = ();
+foreach my $ret (@$nameret) {
+  $namemap{$ret->{ip}}->{switchname}=$ret->{name} || $ret->{dns};
+  $namemap{$ret->{ip}}->{switchloc} = $ret->{location};
+}
+foreach my $port (@$ports) {
+  $port->{switchname} = $namemap{$port->{switch}}->{switchname} || '';
+  $port->{switchloc} = $namemap{$port->{switch}}->{switchloc} || '';
+  $port->{first} = scalar(localtime($port->{time_first}));
+  $port->{last} = scalar(localtime($port->{time_last}));
+}
+# XXX We don't care about the locations here, we leave that to the
+#  png generator.  We just care which maps to display.
+my $mapret = sql_rows('device_port_location', ['image'], { 'ip' => [[keys %ipuniq]]});
+my %maplist = ();
+foreach my $entry (@$mapret) {
+  $maplist{$entry->{image}} = 1;
+}
+</%perl>
+% if (@$ports) {
+%  foreach my $mapname (keys %maplist) {
+<div style="position: relative">
+<img src="maps/<% $mapname %>" style="z-index: 0" width="<% $maps{$mapname}->[0] %>" height="<% $maps{$mapname}->[1] %>">
+<img src="maps/overlay-db.png?width=<% $maps{$mapname}->[0] %>&height=<% $maps{$mapname}->[1] %>&map=<% $mapname %>&username=<% $user %>" style="z-index: 10; position: absolute; top:0;left:0;" width="<% $maps{$mapname}->[0] %>" height="<% $maps{$mapname}->[1] %>">
+</div>
+%  }
+User <%$user%> was seen:
+<ul>
+%   foreach my $port (@$ports) {
+   <li>On <% $port->{switchname} %> (<% $port->{switchloc} %>) port <% $port->{port} %> from <% $port->{first} %> to <% $port->{last} %>
+%   }
+</ul>
+% } else {
+I haven't seen user <%$user%>.  I don't know if that means that they
+haven't reigstered, or their MAC address hasn't been collected, or
+there's a big honkin' bug.  If you suspect the latter, please
+<a href="mailto:fenner@research.att.com?subject=%22Big honkin' bug%22">tell
+Bill</a>.
+<!--
+<% @maclist %>
+-->
+% }
+% } else {
+<h3>AP Utilization</h3>
+%   if (defined($map)) {
+<& SELF:map, map => $map &>
+%   } else {
+%     foreach $map (keys %maps) {
+<& SELF:map, map => $map &>
+%     }
+%   }
+% }
+<%method map>
+<%perl>
+# if $users, this sql is just a little different - no count, and
+# node.switch in [places user has been]?
+my $rows = netdisco::sql_rows('node, device, device_port_location',
+		 ['count(node.switch) as num','x','y','name','location'],
+		 { 'node.switch' => \'device_port_location.ip',
+		'node.active' => 't',
+		'node.time_last' => \\'> device.last_macsuck',
+		'device.ip' => \'device_port_location.ip',
+		'device_port_location.useport' => 0,
+		'device_port_location.image' => $map }, undef,
+		'group by node.switch,x,y,name,location');
+</%perl>
+<div style="position: relative">
+<img src="maps/<%$map%>" style="z-index: 0" width="<% $maps{$map}->[0] %>" height="<% $maps{$map}->[1] %>">
+<img src="maps/overlay-db.png?width=<% $maps{$map}->[0] %>&height=<% $maps{$map}->[1] %>&map=<% $map %>" style="z-index: 10; position: absolute; top:0;left:0;" width="<% $maps{$map}->[0] %>" height="<% $maps{$map}->[1] %>" usemap="#<% $map | u %>">
+% # An empty <map></map> is not legal, so conditionalize it.
+% my $c = 2.30258509299405;	# log(10)
+% if (@$rows) {
+<map name="<% $map | u %>">
+% foreach my $row (@$rows) {
+%   my $r = int(10 + ($row->{val} != 0 ? (CORE::log($row->{val}) * 10 / $c) : 0)); #XXX coordinate with overlay-db.png
+<area shape="circle" coords="<% $row->{x} %>,<% $row->{y} %>,<% $r %>" title="<% $row->{name} %> - <% $row->{location} %> (<% $row->{num} %>)">
+% }
+</map>
+% }
+</div>
+<%args>
+$map
+</%args>
+</%method>
+<%args>
+$map => undef
+$user => undef
+</%args>
+<%method html_head>
+<!-- Javascript hack to fix up transparent PNG for stupid MSIE.
+     Bob Osola is my hero for making it so that I didn't have to
+     think about this. -->
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="pngfix_map.js"></script>
+<![endif]-->
+</%method>
+<%method title>
+- Physical Map / AP Load / User Location
+</%method>
+<%shared>
+# XXX there's got to be a better way to get this
+#  visible to the map method.
+my %maps;
+</%shared>
+<%init>
+foreach my $minfo (@{$netdisco::CONFIG{physical_img}}) {
+	my($filename, $x, $y, $descr) = split(/:/, $minfo, 4);
+	$maps{$filename} = [$x, $y, $descr];
+}
+</%init>

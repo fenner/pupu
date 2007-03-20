@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+#
+use CGI qw/:standard/;
+use GD;
+
+my $width = param('width') || 1;
+my $height = param('height') || 1;
+my $x = param('x');
+my $y = param('y');
+
+print header(-type=>'image/png',-expires=>'+5m');
+
+# This returns a png file, with the specified width and height,
+# fully transparent, with a spot where desired.
+my $img = GD::Image->new($width, $height, 0);	# indexed for small size
+
+my $white = $img->colorAllocate(255,255,255);
+my $red = $img->colorAllocate(255,0,0);
+$img->transparent($white);
+
+$img->filledEllipse($x, $y, 10, 10, $red);
+
+print $img->png;
