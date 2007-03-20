@@ -1,0 +1,152 @@
+<h3>Physical Map Administration</h3>
+<%perl>
+# XXX really need to figure out what to do with ports here.
+if (defined($device)) {
+    if (defined($x) && defined($y) && defined($set) && defined($map)) {
+	my %hash = ( 'ip' => $device, 'port' => '', 'useport' => 'f' );
+#	$netdisco::SQLCARP = 1;
+	my $ret = insert_or_update('device_port_location', \%hash,
+		{ 'image' => $map, 'x' => $x, 'y' => $y, %hash } );
+#XXX insert_or_update() can return undef on non-failure :-(
+#	print "<h4>[databse update failed]</h4>\n" unless (defined($ret));
+#	if (!$ret) {print "<pre>"; print dbh()->errstr; print "</pre>"; }
+#	$netdisco::SQLCARP = 0;
+    } else {
+	my $db = sql_hash('device_port_location', ['x', 'y', 'image'],
+			{ 'ip' => $device, 'useport' => 0 });
+	# If we got a row, and
+	# the map is the right one, then set the x and y.
+	# XXX If we are on the wrong map?...
+	if ($db && (defined($map) && $map eq $db->{image})) {
+	    # Show the existing location on the map
+	    $ARGS{x} = $db->{x};
+	    $ARGS{y} = $db->{y};
+	}
+    }
+}
+</%perl>
+<& SELF:pickmap, %ARGS &>
+<& SELF:pickdevice, %ARGS &>
+
+<%args>
+$device => undef
+$port   => undef
+$map    => undef
+$x      => undef
+$y      => undef
+$set    => undef
+</%args>
+<%method pickmap>
+<%args>
+$map => undef
+$x   => undef
+$y   => undef
+</%args>
+% if (defined($map) && $maps{$map}) {
+<% $maps{$map}->[2] %> | <a href="<& SELF:selfref, %ARGS, map => undef, x => undef, y => undef &>">[change location]</a>
+<br>
+<div style="position: relative">
+<form action="<% $r->uri %>">
+% foreach my $name (keys %ARGS) {
+%   next if ($name =~ /^[xy]$/);
+<input type="hidden" name="<% $name %>" value="<% $ARGS{$name} %>">
+% # quoting of above?
+% }
+<input type="hidden" name="set" value="loc">
+% if (defined($x) && defined($y)) {
+<img src="maps/<%$map%>" style="z-index: 0" width="<% $maps{$map}->[0] %>" height="<% $maps{$map}->[1] %>">
+<input type="image" style="z-index: 10; position: absolute; top:0;left:0;" src="maps/overlay.png?width=<% $maps{$map}->[0] %>&height=<% $maps{$map}->[1] %>&x=<% $x %>&y=<% $y %>" width="<% $maps{$map}->[0] %>" height="<% $maps{$map}->[1] %>">
+% } else {
+<input type="image" src="maps/<%$map%>" width="<% $maps{$map}->[0] %>" height="<% $maps{$map}->[1] %>">
+% }
+</form>
+</div>
+% } else {
+Select location:
+<ul>
+% foreach my $mname (sort {$maps{$a} cmp $maps{$b}} keys %maps) {
+<li><a href="<& SELF:selfref, %ARGS, map => $mname &>"><%$maps{$mname}->[2]%></a>
+% }
+</ul>
+% }
+</%method>
+<%method pickdevice>
+<%args>
+$device => undef
+$port   => undef
+</%args>
+<%perl>
+# XXX BIG TO DO: port-specific locations.
+my (%where) = ();
+if (defined($device)) {
+  $where{'device.ip'} = $device;
+}
+my $devlist = sql_rows('device left join device_port_location on device.ip = device_port_location.ip',['device.ip','name','location','model','vendor','image'], \%where, undef, 'order by device.ip');
+my $dev;
+# XXX todo: if you've picked a device, offer to pick a port,
+#  or unpick the device.  todo2: how does UI work after unpick?
+</%perl>
+<hr>
+% if (defined($device)) {
+<a href="<& SELF:selfref, %ARGS, device => undef, port => undef, set => undef, x => undef, y => undef &>">[pick a different device]</a>
+% }
+<table>
+<tr>
+<th>Device</th>
+<th>Location</th>
+<th>Model</th>
+<th>Vendor</th>
+<th>On Map</th>
+</tr>
+% foreach $dev (@$devlist) {
+<tr>
+<td><a href="<& SELF:selfref, %ARGS, device => $dev->{ip} &>"><%$dev->{name}%> (<%$dev->{ip}%>)</a></td>
+<td><%$dev->{location}%></td>
+<td><%$dev->{model}%></td>
+<td><%$dev->{vendor}%></td>
+<td>
+% if (defined($dev->{image})) {
+<a href="<& SELF:selfref, %ARGS, map => $dev->{image}, device => $dev->{ip} &>"><% $maps{$dev->{image}}->[2] %></a>
+% } else {
+&nbsp;
+% }
+</td>
+</tr>
+% }
+</table>
+</%method>
+<%shared>
+# XXX there's got to be a better way to get this
+#  visible to the pickmap method.  (Maybe the code
+#  that does it should be there)
+my %maps;
+</%shared>
+<%method selfref>
+<%$r->uri%>\
+% if (%ARGS) {
+?<% join("&", map {
+		 if($ARGS{$_}) {
+			$_ . "=" . $m->interp->apply_escapes($ARGS{$_}, 'u')
+		} else {
+			()
+		}
+	} keys %ARGS) %>\
+% }
+</%method>
+<%method html_head>
+<!-- Javascript hack to fix up transparent PNG for stupid MSIE.
+     Bob Osola is my hero for making it so that I didn't have to
+     think about this. -->
+<!--[if lt IE 7]>
+<script defer type="text/javascript" src="pngfix_map.js"></script>
+<![endif]-->
+</%method>
+<%method title>
+- Physical Map Administration
+</%method>
+<%init>
+foreach my $map (@{$netdisco::CONFIG{physical_img}}) {
+	my($filename, $x, $y, $descr) = split(/:/, $map, 4);
+	$maps{$filename} = [$x, $y, $descr];
+}
+</%init>
