@@ -42,7 +42,7 @@ foreach my $entry (@$mapret) {
 }
 </%perl>
 % if (@$ports) {
-%  foreach my $mapname (keys %maplist) {
+%  foreach my $mapname (sort keys %maplist) {
 <div style="position: relative">
 <img src="maps/<% $mapname %>" style="z-index: 0" width="<% $maps{$mapname}->[0] %>" height="<% $maps{$mapname}->[1] %>">
 <img src="maps/overlay-db.png?width=<% $maps{$mapname}->[0] %>&height=<% $maps{$mapname}->[1] %>&map=<% $mapname %>&username=<% $user %>" style="z-index: 10; position: absolute; top:0;left:0;" width="<% $maps{$mapname}->[0] %>" height="<% $maps{$mapname}->[1] %>">
@@ -69,7 +69,7 @@ Bill</a>.
 %   if (defined($map)) {
 <& SELF:map, map => $map &>
 %   } else {
-%     foreach $map (keys %maps) {
+%     foreach $map (sort keys %maps) {
 <& SELF:map, map => $map &>
 %     }
 %   }
@@ -82,7 +82,7 @@ my $rows = netdisco::sql_rows('node, device, device_port_location',
 		 ['count(node.switch) as num','x','y','name','location'],
 		 { 'node.switch' => \'device_port_location.ip',
 		'node.active' => 't',
-		'node.time_last' => \\'> device.last_macsuck',
+		'node.time_last' => \\'>= device.last_macsuck',
 		'device.ip' => \'device_port_location.ip',
 		'device_port_location.useport' => 0,
 		'device_port_location.image' => $map }, undef,
@@ -132,3 +132,8 @@ foreach my $minfo (@{$netdisco::CONFIG{physical_img}}) {
 	$maps{$filename} = [$x, $y, $descr];
 }
 </%init>
+<%method sidebar>
+% return defined($m->session->{user});
+</%method>
+%# $Id$
+%# vim:syntax=mason
