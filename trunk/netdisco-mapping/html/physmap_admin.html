@@ -101,7 +101,7 @@ my $dev;
 % foreach $dev (@$devlist) {
 <tr>
 <td><a href="<& SELF:selfref, %ARGS, device => $dev->{ip} &>"><%$dev->{name}%> (<%$dev->{ip}%>)</a></td>
-<td><%$dev->{location}%></td>
+<td><%$dev->{location} || "[not set]"%><a href="portcontrol.html?ip=<%$dev->{ip}|u%>&cmd=location"> [update]</a></td>
 <td><%$dev->{model}%></td>
 <td><%$dev->{vendor}%></td>
 <td>
