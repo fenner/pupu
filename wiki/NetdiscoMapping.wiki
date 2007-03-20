@@ -16,3 +16,20 @@ These additions add a mapping of access points to physical maps.
    * public_map
    * rss dhandler
    * overlay-db.png
+
+= Configuration =
+
+Change netdisco_apache_dir.conf to include
+
+{{{
+<LocationMatch "/netdisco/.*\.(html|rss|xml)$">
+        SetHandler perl-script
+        PerlHandler netdisco::Mason
+</LocationMatch>
+
+<LocationMatch "/netdisco/maps/overlay.*\.png">
+        SetHandler cgi-script
+</LocationMatch>
+}}}
+
+(You may also need `Options +ExecCGI` in the `overlay.*.png` block)
