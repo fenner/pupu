@@ -1,0 +1,19 @@
+<h3>Who has registered?</h3>
+<%perl>
+my $list = sql_rows('user_mac',['username']);
+my %uniq;
+foreach my $u (@{$list}) {
+ $uniq{$u->{username}} = 1;
+}
+</%perl>
+% foreach my $u (sort keys %uniq) {
+<% $u %>: <a href="public_map.html?user=<% $u %>">location</a> |
+<a href="feed/<% $u %>.rss">RSS feed</a>
+<br>
+% }
+<%method title>
+- Who has registered?
+</%method>
+<%init>
+use Data::Dumper;
+</%init>
