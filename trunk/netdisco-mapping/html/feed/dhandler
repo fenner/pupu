@@ -1,0 +1,102 @@
+<?xml version="1.0"?>
+<rss version="2.0">
+ <channel>
+  <title><%$name%>'s Location</title>
+  <link><%$link%></link>
+  <description>Location history for <%$name%></description>
+  <language>en-us</language>
+  <pubDate><% strftime($feedformtime, gmtime()) %></pubDate>
+% foreach my $port (@$ports) {
+% # XXX this has to be port location, then switch location if there's no
+% # XXX location for the port.
+  <item>
+   <title><%$name%> @ <% $port->{switchloc} or $port->{switchname} %></title>
+   <description>On <% $port->{switchname} %> (<% $port->{switchloc} %>) port <% $port->{port} %> from <% $port->{first} %> to <% $port->{last} %></description>
+% # (Add port name to sql fetch?)
+   <link><% $port->{link} %></link>
+   <pubDate><% $port->{feedtime} %></pubDate>
+  </item>
+% }
+ </channel>
+</rss>
+<%def error>
+<%args>
+$err
+</%args>
+<html>
+<head>
+<title>Feed URL Error</title>
+</head>
+<body>
+<h1>Feed URL error</h1>
+<p><% $err %></p>
+</body>
+</html>
+</%def>
+<%init>
+use POSIX qw/strftime/;
+my $err = undef;
+
+my $arg = $m->dhandler_arg;
+if (!($arg =~ s/\.rss$//)) {
+	# because we're going to do atom also
+	$err = "You must specify the .rss extension.";
+}
+my ($name) = $arg;
+my (@maclist);
+if ($name =~ s/:(.*)//) {
+	@maclist = ($1);
+} else {
+	my $macs = sql_rows('user_mac', ['mac'], {'username' => $name});
+	foreach my $mac (@$macs) {
+		push(@maclist, $mac->{mac});
+	}
+}
+
+# XXX todo: if we didn't find any entries for maclist, this is bad sql: don't do it
+my $ports = sql_rows('node',
+	    ['mac','switch','port','active','oui','extract(epoch from time_first) as time_first', 'extract(epoch from time_last) as time_last'],
+	    {mac => [\@maclist]},
+	    undef,
+	    'order by time_first desc limit 10'
+	    );
+
+if (@$ports == 0 && !$err) {
+	$err = "No records found for that MAC address [" . $name . "] (". join(",", @maclist). ").";
+}
+if ($err) {
+	$m->comp('error', err => $err);
+	return 404;
+}
+
+$r->content_type("application/rss+xml");
+
+# todo:
+# 1. derive /netdisco/ from $r->uri() (or use configuration!!!)
+# 2. pick right scheme
+# 3. quote $mac?
+#my($link) = "http://" . $r->hostname() . "/netdisco/node.html?node=" . $mac . "&amp;dates=1&amp;archive=1&amp;showoui=1";
+my($link) = "http://" . $r->hostname() . "/netdisco/node.html";
+my($feedformtime) = "%a, %d %b %Y %T GMT";
+foreach my $port (@$ports) {
+# to do: make switch list, pull dns + location with sql_rows and make map.
+# to do: make port list per switch, pull port names with sql_rows
+  my $devinfo = sql_hash('device',['dns','name'],{'ip'=>$port->{switch}});
+  if ($devinfo->{dns} ne '') {
+    $port->{switchname} = $devinfo->{dns};
+  } elsif ($devinfo->{name} ne '') {
+    $port->{switchname} = $devinfo->{name};
+  } else {
+    $port->{switchname} = '';
+  }
+  $port->{switchname} =~ s/$netdisco::CONFIG{domain}$//;
+  $port->{switchloc} = sql_scalar('device',['location'],{'ip'=>$port->{switch}}) || '';
+  $port->{first} = scalar(localtime($port->{time_first}));
+  $port->{last} = scalar(localtime($port->{time_last}));
+  $port->{feedtime} = strftime($feedformtime, gmtime($port->{time_last}));
+  $port->{link} = "http://" . $r->hostname() . "/netdisco/node.html?node=" . $port->{mac} . "&amp;dates=1&amp;archive=1&amp;showoui=1";
+}
+</%init>
+<%flags>
+inherit => undef
+</%flags>
