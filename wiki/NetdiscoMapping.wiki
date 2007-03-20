@@ -1,0 +1,18 @@
+#summary Mapping of users to locations based on access point associations in netdisco
+
+= Introduction =
+
+[http://netdisco.org netdisco] is an open-source network management system that discovers the network and discovers where nodes are on the network.  It can walk Access Point MIBs and get the association tables.
+
+These additions add a mapping of access points to physical maps.
+
+= To Do =
+
+ * More Documentation
+ * Handle useport=1 i.e. central controllers that have APs as ports
+ * implement atom feed as well as rss
+ * Use Mason for image generation
+ * Share code for mapping between
+   * public_map
+   * rss dhandler
+   * overlay-db.png
