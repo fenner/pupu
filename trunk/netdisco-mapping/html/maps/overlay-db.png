@@ -17,12 +17,15 @@ my $debug = param('debug');
 
 my $colorlist = [
 	[   0*60, [   0, 255,   0 ] ],
-	[  15*60, [ 255, 255,   0 ] ],
+	[  15*60, [ 255,  75,   0 ] ],
 	[  60*60, [   0,   0, 255 ] ],
 	[ 120*60, [ 255,   0, 255 ] ],
 	[ 240*60, [ 255,   0,   0 ] ] ];
+my $arrowage = 240*60;
 
-print header(-type=>'image/png',-expires=>'+5m');
+if (!$debug) {
+	print header(-type=>'image/png',-expires=>'+5m');
+}
 
 my $img = GD::Image->new($width, $height, 0);	# indexed for small size
 
@@ -55,10 +58,10 @@ if ($user) {
 	}
 	$where{'node.mac'} = [[@maclist]];
 	$groupadd = ",time_last order by time_last";
-	push (@$columns,'extract(epoch from time_last) as time_last');
+	push (@$columns,'extract(epoch from node.time_last) as time_last');
 } else {
 	$where{'node.active'} = 't';
-	$where{'node.time_last'} = \\'> device.last_macsuck';
+	$where{'node.time_last'} = \\'>= device.last_macsuck';
 }
 $rows = netdisco::sql_rows('node, device, device_port_location',
 		 $columns,
@@ -87,6 +90,7 @@ foreach my $row (@$rows) {
 	push(@data, [$x, $y, $val, $row->{time_last}]);
 }
 
+my $prevpoint = undef;
 foreach my $point (@data) {
 	my $color = $red;
 	if ($user) {
@@ -98,11 +102,32 @@ foreach my $point (@data) {
 				$color = $colorit->[2];
 			}
 		}
+		if ($debug) {
+			print "diff = $diff color = $color\n";
+		}
+		if ($prevpoint && $diff < $arrowage) {
+			my $deltax, $deltay, $rx, $ry;
+			$deltax = $prevpoint->[0] - $point->[0];
+			$deltay = $prevpoint->[1] - $point->[1];
+			if ($deltax < 0) { $rx = -5 } else { $rx = 5 };
+			if ($deltay < 0) { $ry = -5 } else { $ry = 5 };
+			# draw arrow.
+			$img->line($prevpoint->[0] - $rx, $prevpoint->[1] - $ry,
+				$point->[0] + $rx, $point->[1] + $ry, $color);
+			# Draw arrowhead.  LAMEO.
+			$img->line($point->[0] + $rx, $point->[1] + $ry,
+				$point->[0] + $rx * 2, $point->[1] + $ry * 2, $color);
+			$img->line($point->[0] + $rx, $point->[1] + $ry,
+				$point->[0] + $rx * 2, $point->[1], $color);
+		}
 	}
 	$img->filledEllipse($point->[0], $point->[1], $point->[2], $point->[2], $color);
+	$prevpoint = $point;
 }
 foreach my $point (@data) {
 	$img->ellipse($point->[0], $point->[1], $point->[2], $point->[2], $black);
 }
 
-print $img->png;
+if (!$debug) {
+	print $img->png;
+}
