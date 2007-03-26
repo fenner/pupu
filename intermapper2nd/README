@@ -1,0 +1,10 @@
+Export maps and vertices in XML format:
+
+Export -> Data File -> Maps -> Select All
+                    -> Vertices -> Select All
+(note that "all" is overkill but easier than saying
+"pick name, id, ip address, ...)
+
+xsltproc intermap2nd.xsl Maps.xsl > device.txt
+<optionally edit device.txt to only include the ones you care about>
+intermap2nd device.txt

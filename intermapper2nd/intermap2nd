@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+use lib '/usr/local/netdisco';
+use netdisco qw/:all/;
+
+use GD;
+
+config('/usr/local/netdisco/netdisco.conf');
+
+%maps = (
+	'IETF68 8th Floor' => 'prghi8.gif',
+	'IETF68 Lobby'	=> 'prghilo.gif',
+	'IETF68 Lower Lobby' => 'prghill.gif',
+	'IETF68 Mezzanine' => 'prghiml.gif'
+	);
+
+	# BLEAH
+$mapdir = "/home/fenner/netdisco-nanog/html/maps";
+
+foreach my $map (keys %maps) {
+	my $mapfile = "$mapdir/$maps{$map}";
+	if (-f $mapfile) {
+		my $img = GD::Image->new($mapfile);
+		next unless defined($img);
+		$bounds{$map} = [$img->getBounds()];
+	}
+}
+
+while (<>) {
+	chomp;
+	my($ip,$device,$mapname,$origin,$x,$y) = split(/\t/);
+	my $dev = sql_hash('device',['*'],{'ip'=>$ip});
+	if (!$dev) {
+		print "No netdisco device for intermapper $device ($ip)\n";
+		next;
+	}
+	if (!$maps{$mapname}) {
+		print "No map known for $mapname\n";
+		next;
+	}
+	if (!$bounds{$mapname}) {
+		print "No bounds known for $mapname\n";
+		next;
+	}
+	if ($origin eq 'center') {
+		$x += $bounds{$mapname}->[0] / 2;
+		$y += $bounds{$mapname}->[1] / 2;
+	} else {
+		print "Dunno how to deal with origin $origin\n";
+		next;
+	}
+	# XXX assuming that export always exports from center
+	#     and the other values of origin are only for import
+	my %store;
+	$store{ip} = $ip;
+	$store{port} = '';
+	$store{useport} = 0;
+	$store{image} = $maps{$mapname};
+	$store{x} = int($x);
+	$store{y} = int($y);
+	insert_or_update('device_port_location', { ip => $ip, port => '', useport => 0 }, \%store);
+	print "$ip $maps{$mapname} $x $y\n";
+}
