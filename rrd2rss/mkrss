@@ -1,0 +1,47 @@
+#!/bin/sh
+cd /usr/local/share/cacti/rra
+PATH=/home/fenner:/usr/local/bin:$PATH
+export PATH
+
+rrditem() {
+echo "<item>"
+graphid=$1
+title=$2
+description=$3
+shift 3
+IFS="
+"
+set -- `rrdrss "$@"`
+unset IFS
+printf "<title>$title</title>\n" "$@"
+printf "<description>$description</description>\n" "$@"
+printf "<link>http://noc.ietf67.org/cacti/graph.php?local_graph_id=%d&amp;rra_id=all</link>\n" $graphid
+echo "</item>"
+}
+
+cat << EOF
+<?xml version="1.0"?>
+<rss version="2.0">
+ <channel>
+  <title>IETF67 Network Status</title>
+  <link>http://noc.ietf67.org/</link>
+  <description>Collected network status info for IETF 67</description>
+  <language>en-us</language>
+EOF
+# Wireless
+rrditem 43 "%s a, %s b/g" "%s 802.11a currently associated, %s 802.11b/g currently associated." localhost_bclients_44.rrd %.0lf AClients BClients
+# Primary link
+rrditem 30 "Primary: %s in, %s out" "Primary Link: %s in, %s out" rtra_traffic_in_33.rrd %.2lf%sbps traffic_in traffic_out
+# Backup link
+rrditem 11 "Backup: %s in, %s out" "Backup link: %s in, %s out" rtrb_traffic_in_14.rrd %.2lf%sbps traffic_in traffic_out
+
+# noc 65 kruft
+# Link to Verio
+#rrditem 79 "Verio: %s in, %s out" "Verio: %s in, %s out" external_router_a_traffic_in_78.rrd %.2lf%sbps traffic_in traffic_out
+# Link to Qwest
+#rrditem 82 "Qwest: %s in, %s out" "Qwest: %s in, %s out" external_router_b_traffic_in_81.rrd %.2lf%sbps traffic_in traffic_out
+
+cat << EOF
+ </channel>
+</rss>
+EOF
