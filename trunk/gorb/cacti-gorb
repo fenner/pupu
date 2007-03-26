@@ -1,0 +1,3 @@
+#!/bin/sh
+/home/fenner/gorb.pl | awk '/^rate/ { rate[$2] += $3 }
+END { print "b:" rate["11.0:"], "g:" rate["54.0:"] }'
