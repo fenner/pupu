@@ -76,37 +76,37 @@ Uses the DISMAN-PING-MIB to cause a remote system to send probes.
 
 Supported probe-specific variables:
 
- *offset*: If you run many probes concurrently you may want to prevent them from hitting your network all at the same time. Using the probe-specific offset parameter you can change the point in time when each probe will be run. Offset is specified in % of total interval, or alternatively as 'random', and the offset from the 'General' section is used if nothing is specified here. Note that this does NOT influence the rrds itself, it is just a matter of when data acqusition is initiated. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
+ * *offset*: If you run many probes concurrently you may want to prevent them from hitting your network all at the same time. Using the probe-specific offset parameter you can change the point in time when each probe will be run. Offset is specified in % of total interval, or alternatively as 'random', and the offset from the 'General' section is used if nothing is specified here. Note that this does NOT influence the rrds itself, it is just a matter of when data acqusition is initiated. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
 
  Example value: 50%
 
- *pings*: How many pings should be sent to each target. Note that the maximum value for DismanPing is 15, which is less than the SmokePing default, so this class has its own default value. If your Database section specifies a value less than 15, you must also set it for this probe. Note that the number of pings in the RRD files is fixed when they are originally generated, and if you change this parameter afterwards, you'll have to delete the old RRD files or somehow convert them.
+ * *pings*: How many pings should be sent to each target. Note that the maximum value for DismanPing is 15, which is less than the SmokePing default, so this class has its own default value. If your Database section specifies a value less than 15, you must also set it for this probe. Note that the number of pings in the RRD files is fixed when they are originally generated, and if you change this parameter afterwards, you'll have to delete the old RRD files or somehow convert them.
 
  Example value: 15
 
  Default value: 15
 
- *step*: Duration of the base interval that this probe should use, if different from the one specified in the 'Database' section. Note that the step in the RRD files is fixed when they are originally generated, and if you change the step parameter afterwards, you'll have to delete the old RRD files or somehow convert them. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
+ * *step*: Duration of the base interval that this probe should use, if different from the one specified in the 'Database' section. Note that the step in the RRD files is fixed when they are originally generated, and if you change the step parameter afterwards, you'll have to delete the old RRD files or somehow convert them. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
 
  Example value: 300
 
 Supported target-specific variables:
 
- *ownerindex*: The SNMP OwnerIndex to use when setting up the test. When using VACM, can map to a Security Name or Group Name of the entity running the test.
+ * *ownerindex*: The SNMP OwnerIndex to use when setting up the test. When using VACM, can map to a Security Name or Group Name of the entity running the test.
 
  Example value: smokeping
 
- *packetsize*: The packetsize parameter lets you configure the packet size for the pings sent. The minimum is 8, the maximum 65507. Use the same number as with fping if you want the same packet sizes being used on the network.
+ * *packetsize*: The packetsize parameter lets you configure the packet size for the pings sent. The minimum is 8, the maximum 65507. Use the same number as with fping if you want the same packet sizes being used on the network.
 
  Default value: 56
 
- *pinghost*: The (mandatory) pinghost parameter specifies the remote system which will execute the pings, as well as the SNMP community string on the device.
+ * *pinghost*: The (mandatory) pinghost parameter specifies the remote system which will execute the pings, as well as the SNMP community string on the device.
 
  Example value: pinger@router.example.com
 
  This setting is mandatory.
 
- *pingsrc*: The (optional) pingsrc parameter specifies the source address to be used for pings. If specified, this parameter must identify an IP address assigned to pinghost.
+ * *pingsrc*: The (optional) pingsrc parameter specifies the source address to be used for pings. If specified, this parameter must identify an IP address assigned to pinghost.
 
  Example value: 192.0.2.9
 
