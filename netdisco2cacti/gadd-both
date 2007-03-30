@@ -1,0 +1,11 @@
+#!/bin/sh
+#
+# dot11 Events
+php add_graphs.php --graph-type ds --graph-template-id 41 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 27 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 41 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 27 --snmp-field ifDescr --snmp-value Dot11Radio1
+# Associated stations
+php add_graphs.php --graph-type ds --graph-template-id 40 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 28 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 40 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 28 --snmp-field ifDescr --snmp-value Dot11Radio1
+# Traffic with 95%
+php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio0.64-802.1Q vLAN subif"
+php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio1.64-802.1Q vLAN subif"

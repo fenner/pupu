@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+cd /usr/local/share/cacti
+if [ $# -ne 1 ]
+then
+	echo "usage: $0 apNN"
+	exit
+fi
+host=$1
+if php add_device.php 5 $host $host ietf67sd 2 0
+then
+	id=`php add_graphs.php --list-hosts | awk "\\$2 == \"$host\" {print \\$1}"`
+	# Cisco CPU utilization
+	php add_graphs.php --graph-type cg --graph-template-id 18 --host-id $id
+fi

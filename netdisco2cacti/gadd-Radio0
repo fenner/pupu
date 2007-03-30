@@ -1,0 +1,6 @@
+#!/bin/sh
+php add_graphs.php --graph-type ds --graph-template-id 39 --host-id $1 --snmp-query-id 10 --snmp-query-type-id 24 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 41 --host-id $1 --snmp-query-id 10 --snmp-query-type-id 26 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio0.628-802.1Q vLAN subif"
+# new tx deferred
+php add_graphs.php --graph-type ds --graph-template-id 48 --host-id $1 --snmp-query-id 10 --snmp-query-type-id 31 --snmp-field ifDescr --snmp-value Dot11Radio0
