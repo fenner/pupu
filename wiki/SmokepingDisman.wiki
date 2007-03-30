@@ -1,0 +1,25 @@
+#summary Smokeping probe using DISMAN-PING-MIB
+
+= Introduction =
+
+For IETF 65, we used the CiscoRTTMonEchoICMP probe to great effect.
+Since we were going to use Junipers for IETF 67, I wrote this probe.
+
+
+= Details =
+
+In retrospect, I probably wouldn't have used basevars as a base probe.
+Since SNMP_Session.pm doesn't have an asynchronous mode, an unresponsive
+router can blow the probe time budget.  On the other hand, I didn't want to
+hammer a single device with multiple SNMP sets at once.
+
+= Installation =
+
+Install pingMIB.pm in smokeping's lib/Smokeping/ directory (the presence of ciscoRttMonMIB.pm will tell you it's the right place).
+
+Install DismanPing.pm in smokeping's lib/Smokeping/probes/ directory (the presence of CiscoRTTMonEchoICMP.pm will tell you it's the right place.)
+
+Configure a probe (I think I actually lost my working sample, go me.  When we get the noc67 disks spinning agin I can find this.  Or some enterprising user will figure it out and edit the wiki, yah, right)
+
+
+Caution: this version may have verbose debugging!  It's the last devel version before deploying, the production version has to wait until the disks are spinning.
