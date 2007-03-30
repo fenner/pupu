@@ -1,11 +1,18 @@
 #!/bin/sh
 #
 # dot11 Events
-php add_graphs.php --graph-type ds --graph-template-id 41 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 27 --snmp-field ifDescr --snmp-value Dot11Radio0
-php add_graphs.php --graph-type ds --graph-template-id 41 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 27 --snmp-field ifDescr --snmp-value Dot11Radio1
+php add_graphs.php --graph-type ds --graph-template-id 37 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 25 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 37 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 25 --snmp-field ifDescr --snmp-value Dot11Radio1
 # Associated stations
-php add_graphs.php --graph-type ds --graph-template-id 40 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 28 --snmp-field ifDescr --snmp-value Dot11Radio0
-php add_graphs.php --graph-type ds --graph-template-id 40 --host-id $1 --snmp-query-id 11 --snmp-query-type-id 28 --snmp-field ifDescr --snmp-value Dot11Radio1
+php add_graphs.php --graph-type ds --graph-template-id 36 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 24 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 36 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 24 --snmp-field ifDescr --snmp-value Dot11Radio1
+# Switched from VLAN SubIF to primary interface
 # Traffic with 95%
-php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio0.64-802.1Q vLAN subif"
-php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio1.64-802.1Q vLAN subif"
+php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio0"
+php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio1"
+# Transmits Deferred
+php add_graphs.php --graph-type ds --graph-template-id 38 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 26 --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id 38 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 26 --snmp-field ifDescr --snmp-value Dot11Radio1
+# Memory Pools
+php add_graphs.php --graph-type ds --graph-template-id 39 --host-id $1 --snmp-query-id 13 --snmp-query-type-id 27 --snmp-field ciscoMemoryPoolName --snmp-value Processor
+php add_graphs.php --graph-type ds --graph-template-id 39 --host-id $1 --snmp-query-id 13 --snmp-query-type-id 27 --snmp-field ciscoMemoryPoolName --snmp-value I/O
