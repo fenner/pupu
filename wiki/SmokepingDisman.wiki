@@ -15,6 +15,8 @@ hammer a single device with multiple SNMP sets at once.
 
 = Installation =
 
+The code is at http://pupu.googlecode.com/svn/trunk/smokeping-disman/
+
 Install pingMIB.pm in smokeping's lib/Smokeping/ directory (the presence of ciscoRttMonMIB.pm will tell you it's the right place).
 
 Install DismanPing.pm in smokeping's lib/Smokeping/probes/ directory (the presence of CiscoRTTMonEchoICMP.pm will tell you it's the right place.)
