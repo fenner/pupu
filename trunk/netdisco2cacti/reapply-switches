@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+#
+use strict;
+use lib '/usr/local/netdisco';
+use netdisco;
+netdisco::config('/usr/local/netdisco/netdisco.conf');
+
+chdir('/usr/local/share/cacti');
+# $netdisco::SQLCARP = 1;
+my $ports = netdisco::sql_rows('device_port,device', ['dns','port','remote_id'],
+		{ 'device_port.ip' => \'device.ip',
+		  'dns' => '%Sw%',
+		  'remote_id' => '!%Ap%'
+		});
+
+my %hostid;
+
+open(HOSTS, "php add_graphs.php --list-hosts|");
+while (<HOSTS>) {
+	chomp;
+	if (/^\s*(\d+)\s*(.*)$/) {
+		my $num = $1;
+		my $name = $2;
+		$name =~ s/\Q$netdisco::CONFIG{domain}\E//;
+		$hostid{$name} = $num;
+	}
+}
+close(HOSTS);
+foreach my $p (@$ports) {
+	my $dev = $p->{dns};
+	my $remote = $p->{remote_id};
+	my $port = $p->{port};
+	$dev =~ s/\Q$netdisco::CONFIG{domain}\E//;
+	$remote =~ s/\Q$netdisco::CONFIG{domain}\E//;
+	print "$dev $hostid{$dev} $port $remote\n";
+	system("php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $hostid{$dev} --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value \"$port\" --graph-title \"$dev - $port - link to $remote\"");
+
+}
