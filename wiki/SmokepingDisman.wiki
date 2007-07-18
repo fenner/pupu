@@ -24,8 +24,7 @@ Install !DismanPing.pm in smokeping's lib/Smokeping/probes/ directory (the prese
 Configure a probe.  Run smokeping --man Smokeping::probes::!DismanPing or see below.
 
 
-*Caution*: this version may have verbose debugging!  It's the last devel version before deploying, the production version has to wait until the disks are spinning.
-
+*Caution*: this version may have verbose debugging!  While it's what we ran in production at IETF 67, it was also under active development at the time.
 
 == NAME ==
 
