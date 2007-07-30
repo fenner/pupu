@@ -1,4 +1,5 @@
 #summary Smokeping probe using DISMAN-PING-MIB
+#labels Featured
 
 = Introduction =
 
