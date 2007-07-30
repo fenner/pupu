@@ -286,7 +286,7 @@ sub ping($) {
 	# Todo: pingCtlTimeout.
         my @snmpsetret;
 	if ((@snmpsetret = &snmpset($host, @values)) && defined($snmpsetret[0])) {
-{ use Data::Dumper; open(TMP, ">>/tmp/disman-smoke"); print TMP Dumper(scalar(localtime(time)), $t->{vars}{menu}, \@snmpsetret); close(TMP); }
+#{ use Data::Dumper; open(TMP, ">>/tmp/disman-smoke"); print TMP Dumper(scalar(localtime(time)), $t->{vars}{menu}, \@snmpsetret); close(TMP); }
 	    $pending->{$t->{tree}} = 1;
 	} else {
 	    Smokeping::do_log("ERROR: DismanPing row creation failed for $t->{vars}{menu}: $SNMP_Session::errmsg");
