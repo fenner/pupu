@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+#
+#use lib '/usr/local/netdisco';
+use lib '/home/fenner/netdisco';
+use netdisco;
+
+netdisco::config("/usr/local/netdisco/netdisco.conf");
+
+use Data::Dumper;
+
+$rancidhome = "/usr/local/var/rancid";
+$down_age = "1 day";
+umask(002);
+
+open(CONFIG,"nd2rancid.conf") || die "nd2rancid.conf: $!\n";
+while (<CONFIG>) {
+	chomp;
+	next if /^#/ || /^\s*$/;
+
+	my($class, $value) = split(/:\s*/, $_, 2);
+	if ($class eq 'rancid_home') {
+		$rancidhome = $value;
+		next;
+	}
+	if ($class eq 'down_age') {
+		$down_age = $value;
+		next;
+	}
+	#
+	# stolen from netdisco.pm
+	my @com = split(/\s*(?<!\\),\s*/,$value);   
+	foreach (@com){
+	    $_ =~ s!\\,!,!g;
+	}
+	$value = \@com;
+
+	if ($map{$class}) {
+		$map{$class} = [ @{$map{$class}}, @$value ];
+	} else {
+		$map{$class} = $value;
+	}
+}
+close(CONFIG);
+
+# Dump all devices from database
+$devs = netdisco::sql_rows('device', [ '*', "age(now(), last_discover) > interval '$down_age' as old"]);
+foreach $dev ( @$devs ) {
+	my $devclass = 'other';
+	foreach $class (keys %map) {
+		if (netdisco::in_device($dev, $map{$class})) {
+			$devclass = $class;
+			last;
+		}
+	}
+	push(@{$list->{$devclass}}, $dev);
+}
+
+foreach $class (keys %$list) {
+	open(ROUTER, ">${rancidhome}/${class}/router.db") || die "${rancidhome}/${class}/router.db: $!\n";
+	foreach $dev (sort {$a->{name} cmp $b->{name}} @{$list->{$class}}) {
+		printf ROUTER "%s:%s:%s\n", $dev->{name}, $dev->{vendor},
+			$dev->{old} ? "down" : "up";
+	}
+	close(ROUTER);
+}

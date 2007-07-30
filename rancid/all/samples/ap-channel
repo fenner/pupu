@@ -1,0 +1,12 @@
+conf t
+int Dot11Radio0
+channel least-congested 2412 2437 2462
+power client 5
+power local 5
+exit
+int Dot11Radio1
+power local max
+power client max
+exit
+exit
+write
