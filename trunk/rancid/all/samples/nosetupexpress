@@ -1,0 +1,4 @@
+conf t
+no setup express
+exit
+write

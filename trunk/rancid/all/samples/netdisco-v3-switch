@@ -1,0 +1,16 @@
+conf t
+snmp-server user netdisco ietf v3 auth sha disconet
+snmp-server group ietf v3 auth write v1default
+snmp-server group ietf v3 auth context vlan-1
+snmp-server group ietf v3 auth context vlan-2
+snmp-server group ietf v3 auth context vlan-3
+snmp-server group ietf v3 auth context vlan-4
+snmp-server group ietf v3 auth context vlan-5
+snmp-server group ietf v3 auth context vlan-16
+snmp-server group ietf v3 auth context vlan-32
+snmp-server group ietf v3 auth context vlan-48
+snmp-server group ietf v3 auth context vlan-64
+snmp-server group ietf v3 auth context vlan-80
+snmp-server group ietf v3 auth context vlan-96
+exit
+write

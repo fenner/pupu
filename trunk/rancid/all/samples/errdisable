@@ -1,0 +1,14 @@
+conf t
+no errdisable detect cause pagp-flap
+no errdisable detect cause dtp-flap
+no errdisable detect cause l2ptguard
+errdisable recovery cause udld
+errdisable recovery cause bpduguard
+errdisable recovery cause security-violation
+errdisable recovery cause channel-misconfig
+errdisable recovery cause link-flap
+errdisable recovery cause gbic-invalid
+errdisable recovery cause loopback
+errdisable recovery interval 30
+exit
+write

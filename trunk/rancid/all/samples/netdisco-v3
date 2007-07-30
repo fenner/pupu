@@ -1,0 +1,5 @@
+conf t
+snmp-server user netdisco ietf v3 auth sha disconet
+snmp-server group ietf v3 auth write v1default
+exit
+write

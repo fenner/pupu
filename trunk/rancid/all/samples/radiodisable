@@ -1,0 +1,9 @@
+conf t
+username cisco priv 15 secret cisco
+int do0
+shutdown
+int do1
+shutdown
+exit
+exit
+write

@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+RANCID=/usr/local/rancid/var
+PATH=/usr/local/rancid/bin:${PATH}
+if [ $# -lt 2 ]
+then
+	echo "usage: $0 class filename"
+	exit
+fi
+class=$1
+cmds=$2
+if [ ! -r ${RANCID}/$class/router.db ]
+then
+	echo "Can't read ${RANCID}/$class/router.db (sudo rancid?)"
+	exit
+fi
+if [ ! -r $cmds ]
+then
+	echo "Can't read command file $cmds"
+	exit
+fi
+IFS=:
+while read a
+do
+	set -- $a
+	if [ "$3" = "down" ]
+	then
+		echo $1 is down in router.db
+		continue
+	fi
+	echo Running $cmds on ${1}:
+	case $2 in
+	cisco)
+		clogin -x $cmds $1;;
+	juniper)
+		jlogin -x $cmds $1;;
+	*)
+		echo "Don't know how to log into $2";;
+	esac
+done < ${RANCID}/$class/router.db | tee ${cmds}.log
