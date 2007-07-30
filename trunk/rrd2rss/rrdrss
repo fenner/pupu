@@ -1,0 +1,21 @@
+#!/bin/sh
+rrd=$1
+shift
+format=$1
+shift
+ARGS=
+for i in "$@"
+do
+	math=""
+	if expr $i : "traffic_" >/dev/null
+	then
+		CDEF="CDEF:cdef_${i}=${i},8,* "
+		VAR="cdef_${i}"
+	else
+		CDEF=""
+		VAR="${i}"
+	fi
+	ARGS="$ARGS DEF:$i=$rrd:$i:AVERAGE ${CDEF}VDEF:${i}_out=${VAR},LAST PRINT:${i}_out:$format"
+done
+rrdtool graph --start=-600 /dev/null $ARGS | tail +2
+
