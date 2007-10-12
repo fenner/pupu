@@ -1,0 +1,6 @@
+#summary Just a note about YATG
+#labels Featured
+
+= Introduction =
+
+Oliver Gorwits' [http://search.cpan.org/perldoc?YATG YATG] looks interesting, including its ability to look directly at netdisco for devices to talk to.
