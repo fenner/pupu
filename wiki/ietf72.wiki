@@ -1,0 +1,13 @@
+#summary A home for IETF72 tech info
+
+= Introduction =
+
+I don't want to lose all this random stuff that people are sending around, so...
+
+= IGMPv3 Configuration =
+
+== On the switch ==
+
+Jean-Marc says:
+
+  user totov3 password mypasswordv3 sha+des read-write all
