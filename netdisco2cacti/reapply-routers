@@ -9,7 +9,7 @@ chdir('/usr/local/share/cacti');
 # $netdisco::SQLCARP = 1;
 my $ports = netdisco::sql_rows('device_port,device', ['dns','port','remote_id'],
 		{ 'device_port.ip' => \'device.ip',
-		  'dns' => '%Sw%',
+		  'dns' => '%Rt%',
 		  'remote_id' => '!%Ap%'
 		});
 
@@ -22,7 +22,7 @@ while (<HOSTS>) {
 		my $num = $1;
 		my $name = $2;
 		$name =~ s/\Q$netdisco::CONFIG{domain}\E//;
-		$hostid{lc($name)} = $num;
+		$hostid{$name} = $num;
 	}
 }
 close(HOSTS);
@@ -40,13 +40,9 @@ foreach my $p (@$ports) {
 	my $port = $p->{port};
 	$dev =~ s/\Q$netdisco::CONFIG{domain}\E//;
 	$remote =~ s/\Q$netdisco::CONFIG{domain}\E//;
-	my $hostid = $hostid{lc($dev)};
-	print "$dev $hostid $port $remote\n";
-	if (not($hostid)) {
-		print "- $dev doesn't have a hostid mapping\n";
-		next;
-	}
-	my $cmd = "php add_graphs.php --graph-type ds --graph-template-id $bits --host-id $hostid --snmp-query-id $if_query --snmp-query-type-id $bits_qid --snmp-field ifDescr --snmp-value \"$port\" --graph-title \"$dev - $port - link to $remote\"";
+	print "$dev $hostid{$dev} $port $remote\n";
+	next unless $hostid{$dev};
+	my $cmd = "php add_graphs.php --graph-type ds --graph-template-id $bits --host-id $hostid{$dev} --snmp-query-id $if_query --snmp-query-type-id $bits_qid --snmp-field ifDescr --snmp-value \"$port\" --graph-title \"$dev - $port - link to $remote\"";
 	#print $cmd;
 	system($cmd);
 }

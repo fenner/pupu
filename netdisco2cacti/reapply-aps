@@ -6,7 +6,7 @@ cd /usr/local/share/cacti
 #	echo Hotel AP: $i
 #	/home/fenner/src/cacti/gadd-Radio0 $i
 #done
-ouraplist=$(php add_graphs.php --list-hosts | awk '$2 ~ /^ap[0-9]*/ {print $1}')
+ouraplist=$(php add_graphs.php --list-hosts | awk '$2 ~ /^[Aa][Pp][0-9]*/ {print $1}')
 for i in $ouraplist
 do
 	echo Our AP: $i

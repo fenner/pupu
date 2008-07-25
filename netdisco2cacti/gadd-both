@@ -1,18 +1,40 @@
 #!/bin/sh
 #
+#
+get_info() {
+  php add_graphs.php --list-$1 | awk "/$2"'$/ { print $1}'
+}
+get_query_type() {
+  php add_graphs.php --snmp-query-id $1 --list-query-types | awk "/$2"'$/ { print $1}'
+}
+
+dot11_query=`get_info snmp-queries 'SNMP - dot11'`
+if_query=`get_info snmp-queries 'SNMP - Interface Statistics'`
+mem_query=`get_info snmp-queries 'SNMP - Cisco Memory'`
+
 # dot11 Events
-php add_graphs.php --graph-type ds --graph-template-id 37 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 25 --snmp-field ifDescr --snmp-value Dot11Radio0
-php add_graphs.php --graph-type ds --graph-template-id 37 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 25 --snmp-field ifDescr --snmp-value Dot11Radio1
+dot11_events=`get_info graph-templates 'Cisco - dot11 Events'`
+dot11_qid=`get_query_type $dot11_query 'Cisco - dot11 Events'`
+php add_graphs.php --graph-type ds --graph-template-id $dot11_events --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $dot11_qid --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id $dot11_events --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $dot11_qid --snmp-field ifDescr --snmp-value Dot11Radio1
 # Associated stations
-php add_graphs.php --graph-type ds --graph-template-id 36 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 24 --snmp-field ifDescr --snmp-value Dot11Radio0
-php add_graphs.php --graph-type ds --graph-template-id 36 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 24 --snmp-field ifDescr --snmp-value Dot11Radio1
+associations=`get_info graph-templates 'Cisco - Associated Stations'`
+associations_qid=`get_query_type $dot11_query 'Associated Stations'`
+php add_graphs.php --graph-type ds --graph-template-id $associations --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $associations_qid --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id $associations --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $associations_qid --snmp-field ifDescr --snmp-value Dot11Radio1
 # Switched from VLAN SubIF to primary interface
 # Traffic with 95%
-php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio0"
-php add_graphs.php --graph-type ds --graph-template-id 31 --host-id $1 --snmp-query-id 1 --snmp-query-type-id 20 --snmp-field ifDescr --snmp-value "Dot11Radio1"
+t95=`get_info graph-templates 'Interface - Traffic .bits.sec, 95th Percentile.'`
+t95_qid=`get_query_type $if_query 'In.Out Bits with 95th Percentile'`
+php add_graphs.php --graph-type ds --graph-template-id $t95 --host-id $1 --snmp-query-id $if_query --snmp-query-type-id $t95_qid --snmp-field ifDescr --snmp-value "Dot11Radio0"
+php add_graphs.php --graph-type ds --graph-template-id $t95 --host-id $1 --snmp-query-id $if_query --snmp-query-type-id $t95_qid --snmp-field ifDescr --snmp-value "Dot11Radio1"
 # Transmits Deferred
-php add_graphs.php --graph-type ds --graph-template-id 38 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 26 --snmp-field ifDescr --snmp-value Dot11Radio0
-php add_graphs.php --graph-type ds --graph-template-id 38 --host-id $1 --snmp-query-id 12 --snmp-query-type-id 26 --snmp-field ifDescr --snmp-value Dot11Radio1
+tdeferred=`get_info graph-templates 'Cisco - dot11 Transmit Deferred'`
+tdeferred_qid=`get_query_type $dot11_query 'dot11 Transmits Deferred'`
+php add_graphs.php --graph-type ds --graph-template-id $tdeferred --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $tdeferred_qid --snmp-field ifDescr --snmp-value Dot11Radio0
+php add_graphs.php --graph-type ds --graph-template-id $tdeferred --host-id $1 --snmp-query-id $dot11_query --snmp-query-type-id $tdeferred_qid --snmp-field ifDescr --snmp-value Dot11Radio1
 # Memory Pools
-php add_graphs.php --graph-type ds --graph-template-id 39 --host-id $1 --snmp-query-id 13 --snmp-query-type-id 27 --snmp-field ciscoMemoryPoolName --snmp-value Processor
-php add_graphs.php --graph-type ds --graph-template-id 39 --host-id $1 --snmp-query-id 13 --snmp-query-type-id 27 --snmp-field ciscoMemoryPoolName --snmp-value I/O
+mem=`get_info graph-templates 'Cisco - Memory Usage'`
+mem_qid=`get_query_type $mem_query 'Cisco - Memory Usage'`
+php add_graphs.php --graph-type ds --graph-template-id $mem --host-id $1 --snmp-query-id $mem_query --snmp-query-type-id $mem_qid --snmp-field ciscoMemoryPoolName --snmp-value Processor
+php add_graphs.php --graph-type ds --graph-template-id $mem --host-id $1 --snmp-query-id $mem_query --snmp-query-type-id $mem_qid --snmp-field ciscoMemoryPoolName --snmp-value I/O
