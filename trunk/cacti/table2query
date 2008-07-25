@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+use SNMP;
+use Data::Dumper;
+
+$kids = $SNMP::MIB{$ARGV[0]};
+if ($kids) {
+	print "   <!-- autotranslated starting from $ARGV[0] -->\n";
+        for ($i = $#{$kids->{children}}; $i >= 0; $i--) {
+		$kid = ${$kids->{children}}[$i];
+		print "   <!-- type $kid->{type} -->\n";
+		print "   <$kid->{label}>\n";
+		print "     <name>$kid->{label}</name>\n";
+		print "     <method>walk</method>\n";
+		print "     <source>value</source>\n";
+		print "     <direction>output</direction>\n";
+		print "     <oid>$kid->{objectID}</oid>\n";
+		print "   </$kid->{label}>\n";
+	}
+} else {
+	print "Can't translate $ARGV[0].\n";
+}
