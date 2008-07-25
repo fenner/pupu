@@ -1,0 +1,7 @@
+#!/bin/sh
+psql --pset "format=unaligned" --pset "fieldsep= " -t -U netdisco -c "select name,dns,snmp_comm from device where name like '%Rt%'" netdisco | while read a
+do
+	set $a
+	dns=`echo $1 | sed -e 's/.ietf71.ietf.org//'`
+	./add-one-router $dns
+done
