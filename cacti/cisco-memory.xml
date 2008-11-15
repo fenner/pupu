@@ -1,0 +1,61 @@
+<query>
+ <name>Cisco memory utilization</name>
+ <description>Cisco memory utilization</description>
+ <oid_index>.1.3.6.1.4.1.9.9.48.1.1.1.2</oid_index>
+ <oid_index_parse>OID/REGEXP:.*\.([0-9]{1,4})$</oid_index_parse>
+ <index_order>ciscoMemoryPoolName</index_order>
+ <index_order_type>numeric</index_order_type>
+ <index_title_format>|chosen_order_field|</index_title_format>
+
+ <fields>
+   <!-- autotranslated starting from ciscoMemoryPoolEntry -->
+   <!-- type OCTETSTR -->
+   <ciscoMemoryPoolName>
+     <name>ciscoMemoryPoolName</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>input</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.2</oid>
+   </ciscoMemoryPoolName>
+   <!-- type GAUGE -->
+   <ciscoMemoryPoolLargestFree>
+     <name>ciscoMemoryPoolLargestFree</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.7</oid>
+   </ciscoMemoryPoolLargestFree>
+   <!-- type GAUGE -->
+   <ciscoMemoryPoolFree>
+     <name>ciscoMemoryPoolFree</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.6</oid>
+   </ciscoMemoryPoolFree>
+   <!-- type GAUGE -->
+   <ciscoMemoryPoolUsed>
+     <name>ciscoMemoryPoolUsed</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.5</oid>
+   </ciscoMemoryPoolUsed>
+   <!-- type INTEGER -->
+   <ciscoMemoryPoolValid>
+     <name>ciscoMemoryPoolValid</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.4</oid>
+   </ciscoMemoryPoolValid>
+   <!-- type INTEGER32 -->
+   <ciscoMemoryPoolAlternate>
+     <name>ciscoMemoryPoolAlternate</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.48.1.1.1.3</oid>
+   </ciscoMemoryPoolAlternate>
+ </fields>
+</query>

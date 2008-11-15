@@ -1,0 +1,97 @@
+   <!-- autotranslated starting from wlsxWlanRadioEntry -->
+   <!-- type INTEGER32 -->
+   <wlanAPRadioNumber>
+     <name>wlanAPRadioNumber</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.1</oid>
+   </wlanAPRadioNumber>
+   <!-- type INTEGER -->
+   <wlanAPRadioType>
+     <name>wlanAPRadioType</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.2</oid>
+   </wlanAPRadioType>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioChannel>
+     <name>wlanAPRadioChannel</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.3</oid>
+   </wlanAPRadioChannel>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioTransmitPower>
+     <name>wlanAPRadioTransmitPower</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.4</oid>
+   </wlanAPRadioTransmitPower>
+   <!-- type INTEGER -->
+   <wlanAPRadioMode>
+     <name>wlanAPRadioMode</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.5</oid>
+   </wlanAPRadioMode>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioUtilization>
+     <name>wlanAPRadioUtilization</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.6</oid>
+   </wlanAPRadioUtilization>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioNumAssociatedClients>
+     <name>wlanAPRadioNumAssociatedClients</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.7</oid>
+   </wlanAPRadioNumAssociatedClients>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioNumMonitoredClients>
+     <name>wlanAPRadioNumMonitoredClients</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.8</oid>
+   </wlanAPRadioNumMonitoredClients>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioNumActiveBSSIDs>
+     <name>wlanAPRadioNumActiveBSSIDs</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.9</oid>
+   </wlanAPRadioNumActiveBSSIDs>
+   <!-- type INTEGER32 -->
+   <wlanAPRadioNumMonitoredBSSIDs>
+     <name>wlanAPRadioNumMonitoredBSSIDs</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.10</oid>
+   </wlanAPRadioNumMonitoredBSSIDs>
+   <!-- type OCTETSTR -->
+   <wlanAPRadioBearing>
+     <name>wlanAPRadioBearing</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.11</oid>
+   </wlanAPRadioBearing>
+   <!-- type OCTETSTR -->
+   <wlanAPRadioTiltAngle>
+     <name>wlanAPRadioTiltAngle</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.5.1.12</oid>
+   </wlanAPRadioTiltAngle>

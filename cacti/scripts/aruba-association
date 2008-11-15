@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+#
+# Usage:
+# aruba-association <aruba>
+# -> outputs SSIDs and number of associations
+# aruba-association <aruba> frequency
+# -> outputs radio frequencies and number of associations
+#
+use lib '/usr/local/netdisco';
+use SNMP::Info;
+use strict;
+
+my $dest = $ARGV[0];
+my $h = new SNMP::Info(
+			 AutoSpecify => 1,
+			 Debug       => 0,
+			 DestHost    => $dest,
+			 Version     => 2,
+			 Community   => 'v3istoohard'
+		       )
+   or die "Can't connect to ${dest}.\n";
+
+my ($idx, $numsta);
+if (defined($ARGV[1]) and $ARGV[1] eq 'frequency') {
+	$idx = $h->wlanAPRadioType();
+	$numsta = $h->wlanAPRadioNumAssociatedClients();
+} else {
+	$idx = $h->wlanAPESSID();
+	$numsta = $h->wlanAPBssidNumAssociatedStations();
+}
+
+my $results = {};
+foreach my $key (keys %$idx) {
+	$results->{$idx->{$key}} += $numsta->{$key};
+}
+foreach my $key (keys %$results) {
+	printf "%s:%d ", $key, $results->{$key};
+}
+print "\n";
