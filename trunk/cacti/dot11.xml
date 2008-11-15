@@ -1,0 +1,121 @@
+<query>
+ <name>Random stuff from dot11 and ciscodot11</name>
+ <description>Random stuff from dot11 and ciscodot11</description>
+	<oid_index>.1.3.6.1.2.1.2.2.1.1</oid_index>
+	<oid_num_indexes>.1.3.6.1.2.1.2.1.0</oid_num_indexes>
+	<index_order>ifDescr:ifName</index_order>
+	<index_order_type>numeric</index_order_type>
+ <index_title_format>|chosen_order_field|</index_title_format>
+
+ <fields>
+		<ifDescr>
+			<name>Description</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.2.2.1.2</oid>
+		</ifDescr>
+		<ifName>
+			<name>Name (IF-MIB)</name>
+			<method>walk</method>
+			<source>value</source>
+			<direction>input</direction>
+			<oid>.1.3.6.1.2.1.31.1.1.1.1</oid>
+		</ifName>
+   <!-- autotranslated starting from dot11PhyTxPowerEntry -->
+   <!-- type INTEGER -->
+   <dot11CurrentTxPowerLevel>
+     <name>dot11CurrentTxPowerLevel</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.2.840.10036.4.3.1.10</oid>
+   </dot11CurrentTxPowerLevel>
+   <!-- autotranslated starting from cDot11ActiveDevicesEntry -->
+   <!-- type GAUGE -->
+   <cDot11ActiveRepeaters>
+     <name>cDot11ActiveRepeaters</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.2.1.3</oid>
+   </cDot11ActiveRepeaters>
+   <!-- type GAUGE -->
+   <cDot11ActiveBridges>
+     <name>cDot11ActiveBridges</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.2.1.2</oid>
+   </cDot11ActiveBridges>
+   <!-- type GAUGE -->
+   <cDot11ActiveWirelessClients>
+     <name>cDot11ActiveWirelessClients</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.2.1.1</oid>
+   </cDot11ActiveWirelessClients>
+   <!-- autotranslated starting from cDot11AssociationStatsEntry -->
+   <!-- type COUNTER -->
+   <cDot11AssStatsDisassociated>
+     <name>cDot11AssStatsDisassociated</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.6</oid>
+   </cDot11AssStatsDisassociated>
+   <!-- type COUNTER -->
+   <cDot11AssStatsDeauthenticated>
+     <name>cDot11AssStatsDeauthenticated</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.5</oid>
+   </cDot11AssStatsDeauthenticated>
+   <!-- type COUNTER -->
+   <cDot11AssStatsRoamedAway>
+     <name>cDot11AssStatsRoamedAway</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.4</oid>
+   </cDot11AssStatsRoamedAway>
+   <!-- type COUNTER -->
+   <cDot11AssStatsRoamedIn>
+     <name>cDot11AssStatsRoamedIn</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.3</oid>
+   </cDot11AssStatsRoamedIn>
+   <!-- type COUNTER -->
+   <cDot11AssStatsAuthenticated>
+     <name>cDot11AssStatsAuthenticated</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.2</oid>
+   </cDot11AssStatsAuthenticated>
+   <!-- type COUNTER -->
+   <cDot11AssStatsAssociated>
+     <name>cDot11AssStatsAssociated</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.273.1.1.3.1.1</oid>
+   </cDot11AssStatsAssociated>
+   <!-- autotranslated starting from cd11IfMacLayerCountersEntry -->
+   <!-- type COUNTER -->
+   <cd11IfSsidMismatches>
+     <name>cd11IfSsidMismatches</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.272.1.2.1.1.1.3</oid>
+   </cd11IfSsidMismatches>
+   <!-- type COUNTER -->
+   <cd11IfRecFrameMacCrcErrors>
+     <name>cd11IfRecFrameMacCrcErrors</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.272.1.2.1.1.1.2</oid>
+   </cd11IfRecFrameMacCrcErrors>
+   <!-- type COUNTER -->
+   <cd11IfTransDeferEnerDetects>
+     <name>cd11IfTransDeferEnerDetects</name>
+     <method>walk</method>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.9.9.272.1.2.1.1.1.1</oid>
+   </cd11IfTransDeferEnerDetects>
+ </fields>
+</query>

@@ -1,0 +1,249 @@
+   <!-- autotranslated starting from wlsxWlanAPEntry -->
+   <!-- type OCTETSTR -->
+   <wlanAPMacAddress>
+     <name>wlanAPMacAddress</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.1</oid>
+   </wlanAPMacAddress>
+   <!-- type IPADDR -->
+   <wlanAPIpAddress>
+     <name>wlanAPIpAddress</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.2</oid>
+   </wlanAPIpAddress>
+   <!-- type OCTETSTR -->
+   <wlanAPName>
+     <name>wlanAPName</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.3</oid>
+   </wlanAPName>
+   <!-- type OCTETSTR -->
+   <wlanAPGroupName>
+     <name>wlanAPGroupName</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.4</oid>
+   </wlanAPGroupName>
+   <!-- type OBJECTID -->
+   <wlanAPModel>
+     <name>wlanAPModel</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.5</oid>
+   </wlanAPModel>
+   <!-- type OCTETSTR -->
+   <wlanAPSerialNumber>
+     <name>wlanAPSerialNumber</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.6</oid>
+   </wlanAPSerialNumber>
+   <!-- type INTEGER32 -->
+   <wlanAPdot11aAntennaGain>
+     <name>wlanAPdot11aAntennaGain</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.7</oid>
+   </wlanAPdot11aAntennaGain>
+   <!-- type INTEGER32 -->
+   <wlanAPdot11gAntennaGain>
+     <name>wlanAPdot11gAntennaGain</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.8</oid>
+   </wlanAPdot11gAntennaGain>
+   <!-- type INTEGER32 -->
+   <wlanAPNumRadios>
+     <name>wlanAPNumRadios</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.9</oid>
+   </wlanAPNumRadios>
+   <!-- type INTEGER -->
+   <wlanAPEnet1Mode>
+     <name>wlanAPEnet1Mode</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.10</oid>
+   </wlanAPEnet1Mode>
+   <!-- type INTEGER -->
+   <wlanAPIpsecMode>
+     <name>wlanAPIpsecMode</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.11</oid>
+   </wlanAPIpsecMode>
+   <!-- type TICKS -->
+   <wlanAPUpTime>
+     <name>wlanAPUpTime</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.12</oid>
+   </wlanAPUpTime>
+   <!-- type OCTETSTR -->
+   <wlanAPModelName>
+     <name>wlanAPModelName</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.13</oid>
+   </wlanAPModelName>
+   <!-- type OCTETSTR -->
+   <wlanAPLocation>
+     <name>wlanAPLocation</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.14</oid>
+   </wlanAPLocation>
+   <!-- type INTEGER32 -->
+   <wlanAPBuilding>
+     <name>wlanAPBuilding</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.15</oid>
+   </wlanAPBuilding>
+   <!-- type INTEGER32 -->
+   <wlanAPFloor>
+     <name>wlanAPFloor</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.16</oid>
+   </wlanAPFloor>
+   <!-- type INTEGER32 -->
+   <wlanAPLoc>
+     <name>wlanAPLoc</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.17</oid>
+   </wlanAPLoc>
+   <!-- type INTEGER -->
+   <wlanAPExternalAntenna>
+     <name>wlanAPExternalAntenna</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.18</oid>
+   </wlanAPExternalAntenna>
+   <!-- type INTEGER -->
+   <wlanAPStatus>
+     <name>wlanAPStatus</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.19</oid>
+   </wlanAPStatus>
+   <!-- type INTEGER32 -->
+   <wlanAPNumBootstraps>
+     <name>wlanAPNumBootstraps</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.20</oid>
+   </wlanAPNumBootstraps>
+   <!-- type INTEGER32 -->
+   <wlanAPNumReboots>
+     <name>wlanAPNumReboots</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.21</oid>
+   </wlanAPNumReboots>
+   <!-- type INTEGER -->
+   <wlanAPUnprovisioned>
+     <name>wlanAPUnprovisioned</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.22</oid>
+   </wlanAPUnprovisioned>
+   <!-- type INTEGER -->
+   <wlanAPMonitorMode>
+     <name>wlanAPMonitorMode</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.23</oid>
+   </wlanAPMonitorMode>
+   <!-- type OCTETSTR -->
+   <wlanAPFQLNBuilding>
+     <name>wlanAPFQLNBuilding</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.24</oid>
+   </wlanAPFQLNBuilding>
+   <!-- type OCTETSTR -->
+   <wlanAPFQLNFloor>
+     <name>wlanAPFQLNFloor</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.25</oid>
+   </wlanAPFQLNFloor>
+   <!-- type OCTETSTR -->
+   <wlanAPFQLN>
+     <name>wlanAPFQLN</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.26</oid>
+   </wlanAPFQLN>
+   <!-- type OCTETSTR -->
+   <wlanAPFQLNCampus>
+     <name>wlanAPFQLNCampus</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.27</oid>
+   </wlanAPFQLNCampus>
+   <!-- type OCTETSTR -->
+   <wlanAPLongitude>
+     <name>wlanAPLongitude</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.28</oid>
+   </wlanAPLongitude>
+   <!-- type OCTETSTR -->
+   <wlanAPLatitude>
+     <name>wlanAPLatitude</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.29</oid>
+   </wlanAPLatitude>
+   <!-- type OCTETSTR -->
+   <wlanAPAltitude>
+     <name>wlanAPAltitude</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.30</oid>
+   </wlanAPAltitude>
+   <!-- type INTEGER -->
+   <wlanAPMeshRole>
+     <name>wlanAPMeshRole</name>
+     <method>walk</method>
+     <source>value</source>
+     <direction>output</direction>
+     <oid>.1.3.6.1.4.1.14823.2.2.1.5.2.1.4.1.31</oid>
+   </wlanAPMeshRole>
