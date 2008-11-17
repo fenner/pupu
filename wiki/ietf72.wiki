@@ -4,9 +4,9 @@
 
 I don't want to lose all this random stuff that people are sending around, so...
 
-= IGMPv3 Configuration =
+= SNMPv3 Configuration =
 
-== On the switch ==
+== On the OmniSwitch ==
 
 Jean-Marc says:
 
