@@ -55,10 +55,18 @@ foreach $dev ( @$devs ) {
 	push(@{$list->{$devclass}}, $dev);
 }
 
+%VENDORMAP = (
+	'arista' => 'cisco',
+);
+
 foreach $class (keys %$list) {
 	open(ROUTER, ">${rancidhome}/${class}/router.db") || die "${rancidhome}/${class}/router.db: $!\n";
 	foreach $dev (sort {$a->{name} cmp $b->{name}} @{$list->{$class}}) {
-		printf ROUTER "%s:%s:%s\n", $dev->{name}, $dev->{vendor},
+		$vendor = $dev->{vendor};
+		if ($VENDORMAP{$vendor}) {
+			$vendor = $VENDORMAP{$vendor};
+		}
+		printf ROUTER "%s:%s:%s\n", $dev->{name}, $vendor,
 			$dev->{old} ? "down" : "up";
 	}
 	close(ROUTER);
