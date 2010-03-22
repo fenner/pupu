@@ -1,0 +1,5 @@
+#!/bin/sh
+# Walk AIRESPACE-WIRELESS-MIB::bsnMobileStationProtocol and
+# summarize the dot11a/dot11b/dot11g users.
+snmpwalk -Oq -Ov 192.168.253.5 AIRESPACE-WIRELESS-MIB::bsnMobileStationProtocol | \
+    awk '{ v[$1] += 1 } END { print "a:" v["dot11a"], "b:" v["dot11b"], "g:" v["dot11g"] }'
