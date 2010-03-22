@@ -49,10 +49,14 @@ sub client_rates ($) {
 
     my ($session, $error) = Net::SNMP->session(
 	-timeout     => '1',
-	-version     => 'snmpv2c',
+	#-version     => 'snmpv2c',
+	-version     => 'snmpv3',
 	-nonblocking => 1,
 	-hostname    => $host,
-	-community   => 'ietf68',
+	#-community   => 'ietf68',
+        -username     => 'netdisco',
+	-authprotocol => 'sha',
+	-authpassword => 'Disco stu does not advertise.',
     );
     if (!defined($session)) {
 	#printf("ERROR: %s.\n", $error);
