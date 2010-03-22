@@ -1,7 +1,7 @@
 #!/bin/sh
 #
-RANCID=/usr/local/rancid/var
-PATH=/usr/local/rancid/bin:${PATH}
+RANCID=/home/rancid
+PATH=/usr/local/libexec/rancid:${PATH}
 if [ $# -lt 2 ]
 then
 	echo "usage: $0 class filename"
@@ -34,6 +34,8 @@ do
 		clogin -x $cmds $1;;
 	juniper)
 		jlogin -x $cmds $1;;
+	omniswitch)
+		ologin -x $cmds $1;;
 	*)
 		echo "Don't know how to log into $2";;
 	esac
