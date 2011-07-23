@@ -9,9 +9,11 @@ netdisco::config("/usr/local/netdisco/netdisco.conf");
 use Data::Dumper;
 
 @roots = ();
-$dev_regexp = '.*-sw';
+$dev_regexp = 'sw-.*';
 @onpath_cfg = ();
 @offpath_cfg = ();
+$ap_regexp = 'ap.*';
+@ap_cfg = ();
 
 open(CONFIG,"ndt.conf") || die "ndt.conf: $!\n";
 while (<CONFIG>) {
@@ -34,6 +36,14 @@ while (<CONFIG>) {
 	}
 	if ($var eq 'offpath_cfg') {
 		$offpath_cfg[$#offpath_cfg + 1] = $value;
+		next;
+	}
+	if ($var eq 'ap_regexp') {
+		$ap_regexp = $value;
+		next;
+	}
+	if ($var eq 'ap_cfg') {
+		$ap_cfg[$#ap_cfg + 1] = $value;
 		next;
 	}
 	print "Couldn't parse $_\n";
@@ -103,12 +113,16 @@ foreach $root (@roots) {
 foreach $device (sort keys( %porttype )) {
 	if ($use_files) {
 		open( CFG, ">${device}.cfg" );
+		print CFG "conf t\n";
 	} else {
 		*CFG = *STDOUT;
 		print "\n\n$device configuration:\n!\n";
 	}
-	foreach $port (sort keys( %{$porttype{ $device }} )) {
+	foreach $port (sort netdisco::sort_port keys( %{$porttype{ $device }} )) {
 		print CFG "interface $port\n";
+		if ( $remote{ $device }{ $port } ) {
+			print CFG "   description $remote{ $device }{ $port }\n";
+		}
 		if ($porttype{ $device }{ $port } ne 'unknown') {
 			print CFG "   ! $porttype{ $device }{ $port }\n";
 			$cfg = \@onpath_cfg;
@@ -118,5 +132,11 @@ foreach $device (sort keys( %porttype )) {
 		foreach $line (@$cfg) {
 			print CFG "   $line\n";
 		}
+		if ( $remote{ $device }{ $port } =~ $ap_regexp ) {
+			foreach $line (@ap_cfg) {
+				print CFG "   $line\n";
+			}
+		}
 	}
+	print CFG "end\nwr\n";
 }
