@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+#
+# Walk through aps.txt
+# If there an AP has no clients, reload it.
+# Write reloaded aps to aps-reloaded.txt with a timestamp
+#
+
+use SNMP;
+use SNMP::Info;
+use POSIX qw(strftime);
+
+SNMP::loadModules( 'OLD-CISCO-TS-MIB' );	# for tsMsgSend
+
+open( RELOADED, "aps-reloaded.txt" );
+while (<RELOADED>) {
+	chomp;
+	s/#.*//;
+	next unless $_;
+	( $ap, $when ) = split( / /, $_, 2 );
+	$reloaded{ $ap } = $when;
+}
+open( RELOADED, ">>", "aps-reloaded.txt" );
+
+open( APLIST, "aps.txt" );
+while (<APLIST>) {
+	chomp;
+	$ap = $_;
+	if ( $reloaded{ $ap } ) {
+		print "$ap was reloaded at $reloaded{ $ap }\n";
+		next;
+	}
+	$dev = new SNMP::Info( AutoSpecify => 1, DestHost => $ap );
+	# Rely on snmp.conf for credentials
+	if ( !defined( $dev ) ) {
+		print "SNMP::Info couldn't talk to $ap\n";
+		next;
+	}
+	$clients = $dev->cDot11ActiveWirelessClients();
+	$numClients = 0;
+	foreach my $client ( keys %{$clients} ) {
+		$numClients += $clients->{$client};
+	}
+	print "$ap: $numClients\n";
+	if ( $numClients == 0 ) {
+		print "reloading $ap\n";
+		# reload(2)
+		$ret = $dev->set_tsMsgSend( 2 );
+		if ( !defined( $ret ) ) {
+			print "snmp set failed for $ap\n";
+			next;
+		}
+		$now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
+		print RELOADED "$ap $now_string\n";
+	}
+}

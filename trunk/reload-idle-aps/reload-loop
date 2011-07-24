@@ -1,0 +1,10 @@
+#!/bin/sh
+while :
+do
+	date >> loop.log
+	./reload-idle-aps >> loop.log
+	echo Still to be reloaded at `date`:
+	awk '{print $1}' aps-reloaded.txt | sort > apnames-reloaded.txt
+	comm -23 aps.txt apnames-reloaded.txt | fmt
+	sleep 600
+done
