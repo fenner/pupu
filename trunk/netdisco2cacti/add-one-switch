@@ -1,17 +1,23 @@
 #!/bin/sh
 #
-cd /usr/local/share/cacti
-if [ $# -ne 1 ]
+cd /usr/local/share/cacti/cli
+if [ $# -lt 1 ]
 then
-	echo "usage: $0 apNN"
+	echo "usage: $0 switch [ip]"
 	exit
 fi
 host=$1
-cisco_router=`php add_device.php --host-templates | awk '/Cisco Router$/ {print $1}'`
-if php add_device.php $cisco_router $host $host ietf70vancouver 2 0
+if [ $# -gt 1 ]
+then
+	ip=$2
+else
+	ip=$host
+fi
+cisco_router=`php add_device.php --list-host-templates | awk '/Cisco Router$/ {print $1}'`
+if php add_device.php --description=$host --ip=$ip --template=$cisco_router --version=3 --username=netdisco --password="Disco stu does not advertise." --authproto=SHA --privproto='[None]' --avail=snmp
 then
 	id=`php add_graphs.php --list-hosts | awk "\\$2 == \"$host\" {print \\$1}"`
 	cpu_util=`php add_graphs.php --list-graph-templates | awk '/Cisco - CPU Usage$/ {print $1}'`
 	# Cisco CPU utilization
-	php add_graphs.php --graph-type cg --graph-template-id $cpu_util --host-id $id
+	php add_graphs.php --graph-type=cg --graph-template-id=$cpu_util --host-id=$id
 fi

@@ -1,7 +1,14 @@
 #!/bin/sh
-psql --pset "format=unaligned" --pset "fieldsep= " -t -U netdisco -c "select name,dns,snmp_comm from device where name like '%Rt%'" netdisco | while read a
+psql --pset "format=unaligned" --pset "fieldsep= " -t -U netdisco -c "select name,dns,snmp_comm,vendor from device where name ilike '%rtr%'" netdisco | while read a
 do
 	set $a
-	dns=`echo $1 | sed -e 's/.ietf71.ietf.org//'`
-	./add-one-router $dns
+	dns=`echo $1 | sed -e 's/.meeting.ietf.org//'`
+	vendor=$4
+	case $vendor in
+		cisco) script="add-one-router";;
+		juniper) script="add-one-juniper-router";;
+		*) echo "Don't know how to add a $vendor router"
+		   continue;;
+	esac
+	./$script $dns
 done
