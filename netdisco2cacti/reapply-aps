@@ -1,14 +1,14 @@
 #!/bin/sh
-cd /usr/local/share/cacti
+cd /usr/local/share/cacti/cli
 #hotelaplist=$(php add_graphs.php --list-hosts | awk '$2 ~ /^ap_/ {print $1}')
 #for i in $hotelaplist
 #do
 #	echo Hotel AP: $i
 #	/home/fenner/src/cacti/gadd-Radio0 $i
 #done
-ouraplist=$(php add_graphs.php --list-hosts | awk '$2 ~ /^[Aa][Pp][0-9]*/ {print $1}')
+ouraplist=$(php add_graphs.php --list-hosts | awk '$2 ~ /^[Aa][Pp]-?[0-9]*/ {print $1}')
 for i in $ouraplist
 do
 	echo Our AP: $i
-	/home/fenner/src/cacti/gadd-both $i
+	/home/fenner/src/pupu/netdisco2cacti/gadd-both $i
 done

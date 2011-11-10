@@ -5,12 +5,12 @@ use lib '/usr/local/netdisco';
 use netdisco;
 netdisco::config('/usr/local/netdisco/netdisco.conf');
 
-chdir('/usr/local/share/cacti');
+chdir('/usr/local/share/cacti/cli');
 # $netdisco::SQLCARP = 1;
 my $ports = netdisco::sql_rows('device_port,device', ['dns','port','remote_id'],
 		{ 'device_port.ip' => \'device.ip',
-		  'dns' => '%Rt%',
-		  'remote_id' => '!%Ap%'
+		  'dns' => '%rtr%',
+		  'remote_id' => '!%ap%'
 		});
 
 my %hostid;
@@ -23,6 +23,7 @@ while (<HOSTS>) {
 		my $name = $2;
 		$name =~ s/\Q$netdisco::CONFIG{domain}\E//;
 		$hostid{$name} = $num;
+                print lc($name), " -> ", $num, "\n";
 	}
 }
 close(HOSTS);
@@ -32,9 +33,11 @@ my $if_query=`php add_graphs.php --list-snmp-queries | awk '/SNMP - Interface St
 chomp($if_query);
 my $bits=`php add_graphs.php --list-graph-templates | awk '/Interface - Traffic .bits.sec.\$/ { print \$1 }'`;
 chomp($bits);
-my $bits_qid=`php add_graphs.php --snmp-query-id $if_query --list-query-types | awk '/In.Out Bits .64-bit Counters.\$/ { print \$1}'`;
+my $bits_qid=`php add_graphs.php --snmp-query-id=$if_query --list-query-types | awk '/In.Out Bits\$/ { print \$1}'`;
+#my $bits_qid=`php add_graphs.php --snmp-query-id=$if_query --list-query-types | awk '/In.Out Bits .64-bit Counters.\$/ { print \$1}'`;
 chomp($bits_qid);
 foreach my $p (@$ports) {
+        #print "ports -> @$ports";
 	my $dev = $p->{dns};
 	my $remote = $p->{remote_id};
 	my $port = $p->{port};
@@ -42,7 +45,7 @@ foreach my $p (@$ports) {
 	$remote =~ s/\Q$netdisco::CONFIG{domain}\E//;
 	print "$dev $hostid{$dev} $port $remote\n";
 	next unless $hostid{$dev};
-	my $cmd = "php add_graphs.php --graph-type ds --graph-template-id $bits --host-id $hostid{$dev} --snmp-query-id $if_query --snmp-query-type-id $bits_qid --snmp-field ifDescr --snmp-value \"$port\" --graph-title \"$dev - $port - link to $remote\"";
-	#print $cmd;
+	my $cmd = "php add_graphs.php --graph-type=ds --graph-template-id=$bits --host-id=$hostid{$dev} --snmp-query-id=$if_query --snmp-query-type-id=$bits_qid --snmp-field=ifDescr --snmp-value=\"$port\" --graph-title=\"$dev - $port - link to $remote\"";
+	print $cmd;
 	system($cmd);
 }
