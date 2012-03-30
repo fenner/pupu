@@ -34,6 +34,12 @@ while (<CONFIG>) {
 	}
 	$value = \@com;
 
+	if ($class eq 'by_ip') {
+		foreach (@com) {
+			$by_ip{ $_ } = 1;
+		}
+	}
+
 	if ($map{$class}) {
 		$map{$class} = [ @{$map{$class}}, @$value ];
 	} else {
@@ -43,7 +49,7 @@ while (<CONFIG>) {
 close(CONFIG);
 
 # Dump all devices from database
-$devs = netdisco::sql_rows('device', [ '*', "age(now(), last_discover) > interval '$down_age' as old"]);
+$devs = netdisco::sql_rows('device', [ '*', "age(now(), last_discover) > interval '$down_age' as old"], undef, undef, 'order by name,ip');
 foreach $dev ( @$devs ) {
 	my $devclass = 'other';
 	foreach $class (keys %map) {
@@ -56,7 +62,6 @@ foreach $dev ( @$devs ) {
 }
 
 %VENDORMAP = (
-	'arista' => 'cisco',
 );
 
 foreach $class (keys %$list) {
@@ -66,7 +71,12 @@ foreach $class (keys %$list) {
 		if ($VENDORMAP{$vendor}) {
 			$vendor = $VENDORMAP{$vendor};
 		}
-		printf ROUTER "%s:%s:%s\n", $dev->{name}, $vendor,
+		if ($by_ip{$class}) {
+			$name = $dev->{ip};
+		} else {
+			$name = $dev->{name};
+		}
+		printf ROUTER "%s:%s:%s\n", $name, $vendor,
 			$dev->{old} ? "down" : "up";
 	}
 	close(ROUTER);
