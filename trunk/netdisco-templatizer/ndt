@@ -49,9 +49,6 @@ foreach my $device (@devices) {
 	if ($name =~ $dev_regexp) {
 		$porttype{ $name } = {};
 		my @ports = schema('netdisco')->resultset('DevicePort')->search({ip => $device->ip});
-		# TODO: This doesn't work with manual topology,
-		# since that only sets remote_ip.  We need to join
-		# remote_ip with device to get that.
 		foreach my $port (@ports) {
 			my $port_name = $port->port;
 			if ($port_name =~ /Ethernet/) {
@@ -59,6 +56,8 @@ foreach my $device (@devices) {
 				my $remote_id;
 				if (exists($remote_override->{ $name }{ $port_name })) {
 					$remote_id = $remote_override->{ $name }{ $port_name };
+				} elsif ($port->neighbor) {
+					$remote_id = $port->neighbor->name;
 				} else {
 					$remote_id = $port->remote_id;
 				}
