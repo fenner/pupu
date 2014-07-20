@@ -1,74 +1,69 @@
 #!/usr/bin/perl
 #
-use lib '/usr/local/netdisco';
-use netdisco;
+use strict;
+use warnings;
 
-$use_files = 1;
-netdisco::config("/usr/local/netdisco/netdisco.conf");
+use lib '/home/netdisco/perl5/lib/perl5';
+use App::Netdisco;
+use Dancer ':script';
+use Dancer::Plugin::DBIC 'schema';
+
+use Data::Printer;
+use App::Netdisco::Util::Device ':all';
+use App::Netdisco::Util::Permission ':all';
+
+my $use_files = 1;
 
 use Data::Dumper;
 
-@roots = ();
-$dev_regexp = 'sw-.*';
-@onpath_cfg = ();
-@offpath_cfg = ();
-$ap_regexp = 'ap.*';
-@ap_cfg = ();
-
-open(CONFIG,"ndt.conf") || die "ndt.conf: $!\n";
-while (<CONFIG>) {
-	chomp;
-	next if /^#/ || /^\s*$/;
-
-	my($var, $value) = split(/:\s*/, $_, 2);
-	if ($var eq 'dev_regexp') {
-		$dev_regexp = $value;
-		next;
-	}
-
-	if ($var eq 'root') {
-		$roots[$#roots + 1] = $value;
-		next;
-	}
-	if ($var eq 'onpath_cfg') {
-		$onpath_cfg[$#onpath_cfg + 1] = $value;
-		next;
-	}
-	if ($var eq 'offpath_cfg') {
-		$offpath_cfg[$#offpath_cfg + 1] = $value;
-		next;
-	}
-	if ($var eq 'ap_regexp') {
-		$ap_regexp = $value;
-		next;
-	}
-	if ($var eq 'ap_cfg') {
-		$ap_cfg[$#ap_cfg + 1] = $value;
-		next;
-	}
-	print "Couldn't parse $_\n";
-}
+my $domain_suffix = setting( 'domain_suffix' );
+my $settings = setting( 'ndt' );
+my $dev_regexp = $settings->{ 'dev_regexp' } || 'sw-.*';
+my $ap_regexp = $settings->{ 'ap_regexp' } || 'ap.*';
+my $down_age = $settings->{ 'down_age' } || '1 hour';
+my $remote_override = $settings->{ 'remote_override' } || {};
+# TODO: get these from settings
+my $roots = $settings->{ 'roots' };
+my $onpath_cfg = $settings->{ 'onpath_cfg' };
+my $offpath_cfg = $settings->{ 'offpath_cfg' };
+my $ap_cfg = $settings->{ 'ap_cfg' };
 
 # We need all of the ports on all of the devices that match
 # the regexp.
 
-$devices = netdisco::sql_rows( 'device d', [ '*' ] );
-%porttype = ();
-%remote = ();
-foreach $device (@$devices) {
-	$name = $device->{name};
-	$name =~ s/\.meeting.ietf.org//;	# XXX
+my @devices = schema('netdisco')->resultset('Device')->search({},
+  {
+    '+columns' => {
+      old => \"age(now(), last_discover) > interval '$down_age'"
+    }
+  })->all;
+
+# AIEEE
+#no strict;
+
+my %porttype = ();
+my %remote = ();
+foreach my $device (@devices) {
+	my $name = lc($device->name);
+	$name =~ s/$domain_suffix//;
 	if ($name =~ $dev_regexp) {
 		$porttype{ $name } = {};
-		$ports = netdisco::sql_rows( 'device_port p', [ '*' ],
-						{ 'p.ip' => $device->{ip} } );
-		foreach $port (@$ports) {
-			$port_name = $port->{port};
+		my @ports = schema('netdisco')->resultset('DevicePort')->search({ip => $device->ip});
+		# TODO: This doesn't work with manual topology,
+		# since that only sets remote_ip.  We need to join
+		# remote_ip with device to get that.
+		foreach my $port (@ports) {
+			my $port_name = $port->port;
 			if ($port_name =~ /Ethernet/) {
 				$porttype{ $name }{ $port_name } = 'unknown';
-				$remote_id = $port->{remote_id};
+				my $remote_id;
+				if (exists($remote_override->{ $name }{ $port_name })) {
+					$remote_id = $remote_override->{ $name }{ $port_name };
+				} else {
+					$remote_id = $port->remote_id;
+				}
 				if ($remote_id) {
-					$remote_id =~ s/\.meeting.ietf.org//;	#XXX
+					$remote_id =~ s/$domain_suffix//;
 					$remote{ $name }{ $port_name } = $remote_id;
 				}
 			}
@@ -76,10 +71,10 @@ foreach $device (@$devices) {
 	}
 }
 
-%rungraph = ();
-foreach $root (@roots) {
+my %rungraph = ();
+foreach my $root (@$roots) {
 	print $root, "\n";
-	($dev, $port, $who) = split(/:/, $root);
+	my ($dev, $port, $who) = split(/:/, $root);
 	$porttype{ $dev }{ $port } = $who;
 	if ($rungraph{ $dev }) {
 		next;
@@ -87,7 +82,7 @@ foreach $root (@roots) {
 	$rungraph{ $dev } = 1;
 
 	# Find the graphviz node name for $dev.
-	$gvnode = qx/gvpr 'N [ \$.label == "$dev" ] { printf( "%s\n", \$.name ) }' graph_raw.dot/;
+	my $gvnode = qx/gvpr 'N [ \$.label == "$dev" ] { printf( "%s\n", \$.name ) }' graph_raw.dot/;
 	chomp $gvnode;
 
 	if ($gvnode eq '') {
@@ -95,13 +90,13 @@ foreach $root (@roots) {
 		exit(-1);
 	}
 	print "$dev -> $gvnode\n";
-	$cmd = q/dijkstra -p / . $gvnode . q/ graph_raw.dot | gvpr 'N [ $.dist != "0.000" ] { node_t n; n = node( $G, $.prev ); printf( "%s %s\n", $.label, n.label ) }' |/;
+	my $cmd = q/dijkstra -p / . $gvnode . q/ graph_raw.dot | gvpr 'N [ $.dist != "0.000" ] { node_t n; n = node( $G, $.prev ); printf( "%s %s\n", $.label, n.label ) }' |/;
 	open( NODES, $cmd );
 	while (<NODES>) {
 		chomp;
-		( $downlink, $uplink ) = split;
-		foreach $port ( keys( %{$remote{ $downlink }} ) ) {
-			if ($remote{ $downlink }{ $port } eq $uplink ) {
+		my ( $downlink, $uplink ) = split;
+		foreach my $port ( keys( %{$remote{ $downlink }} ) ) {
+			if (lc( $remote{ $downlink }{ $port } ) eq $uplink ) {
 				$porttype{ $downlink }{ $port } = "uplink to $uplink for $who";
 			}
 		}
@@ -110,7 +105,7 @@ foreach $root (@roots) {
 
 #print Dumper( \%porttype );
 #print Dumper( \%remote );
-foreach $device (sort keys( %porttype )) {
+foreach my $device (sort keys( %porttype )) {
 	if ($use_files) {
 		open( CFG, ">${device}.cfg" );
 		print CFG "conf t\n";
@@ -118,22 +113,25 @@ foreach $device (sort keys( %porttype )) {
 		*CFG = *STDOUT;
 		print "\n\n$device configuration:\n!\n";
 	}
-	foreach $port (sort netdisco::sort_port keys( %{$porttype{ $device }} )) {
+        # TODO: pretty sort by netdisco port name
+	foreach my $port (sort keys( %{$porttype{ $device }} )) {
 		print CFG "interface $port\n";
 		if ( $remote{ $device }{ $port } ) {
 			print CFG "   description $remote{ $device }{ $port }\n";
 		}
+		my $cfg;
 		if ($porttype{ $device }{ $port } ne 'unknown') {
 			print CFG "   ! $porttype{ $device }{ $port }\n";
-			$cfg = \@onpath_cfg;
+			$cfg = $onpath_cfg;
 		} else {
-			$cfg = \@offpath_cfg;
+			$cfg = $offpath_cfg;
 		}
-		foreach $line (@$cfg) {
+		foreach my $line (@$cfg) {
 			print CFG "   $line\n";
 		}
-		if ( $remote{ $device }{ $port } =~ $ap_regexp ) {
-			foreach $line (@ap_cfg) {
+		if ( defined( $remote{ $device }{ $port } ) &&
+				$remote{ $device }{ $port } =~ $ap_regexp ) {
+			foreach my $line (@$ap_cfg) {
 				print CFG "   $line\n";
 			}
 		}
