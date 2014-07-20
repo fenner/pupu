@@ -11,6 +11,7 @@ use Dancer::Plugin::DBIC 'schema';
 use Data::Printer;
 use App::Netdisco::Util::Device ':all';
 use App::Netdisco::Util::Permission ':all';
+use App::Netdisco::Util::Web;	# for sort_port
 
 my $use_files = 1;
 
@@ -22,24 +23,23 @@ my $dev_regexp = $settings->{ 'dev_regexp' } || 'sw-.*';
 my $ap_regexp = $settings->{ 'ap_regexp' } || 'ap.*';
 my $down_age = $settings->{ 'down_age' } || '1 hour';
 my $remote_override = $settings->{ 'remote_override' } || {};
-# TODO: get these from settings
 my $roots = $settings->{ 'roots' };
 my $onpath_cfg = $settings->{ 'onpath_cfg' };
 my $offpath_cfg = $settings->{ 'offpath_cfg' };
 my $ap_cfg = $settings->{ 'ap_cfg' };
 
+if (!$roots || !$onpath_cfg || !$offpath_cfg) {
+   die "Make sure to set roots, onpath_cfg and offpath_cfg!!\n";
+}
+
 # We need all of the ports on all of the devices that match
 # the regexp.
-
 my @devices = schema('netdisco')->resultset('Device')->search({},
   {
     '+columns' => {
       old => \"age(now(), last_discover) > interval '$down_age'"
     }
   })->all;
-
-# AIEEE
-#no strict;
 
 my %porttype = ();
 my %remote = ();
@@ -113,8 +113,7 @@ foreach my $device (sort keys( %porttype )) {
 		*CFG = *STDOUT;
 		print "\n\n$device configuration:\n!\n";
 	}
-        # TODO: pretty sort by netdisco port name
-	foreach my $port (sort keys( %{$porttype{ $device }} )) {
+	foreach my $port (sort { &App::Netdisco::Util::Web::sort_port( $a, $b ) } keys( %{$porttype{ $device }} )) {
 		print CFG "interface $port\n";
 		if ( $remote{ $device }{ $port } ) {
 			print CFG "   description $remote{ $device }{ $port }\n";
