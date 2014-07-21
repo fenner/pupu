@@ -1,0 +1,9 @@
+#!/bin/sh
+PATH=/usr/local/libexec/rancid:$PATH
+export CLOGINRC=~rancid/.cloginrc
+for i in *.cfg
+do
+   switch=`basename $i .cfg`
+   echo ${switch}:
+   clogin -x $i ${switch} | tee ${switch}.out
+done
