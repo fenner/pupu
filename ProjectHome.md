@@ -1,0 +1,1 @@
+Bill does a lot of network management, monitoring, etc. stuff, mostly as a volunteer at conferences.  Since this is volunteer work, all the 'round to it's occur during the meeting setup, so these scripts are perpetually unfinished - but they're potentially useful to others since they did assist in deploying the network.

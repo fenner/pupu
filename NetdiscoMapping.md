@@ -1,0 +1,33 @@
+# Introduction #
+
+[netdisco](http://netdisco.org) is an open-source network management system that discovers the network and discovers where nodes are on the network.  It can walk Access Point MIBs and get the association tables.
+
+These additions add a mapping of access points to physical maps.
+
+# To Do #
+
+  * More Documentation
+  * Handle useport=1 i.e. central controllers that have APs as ports
+  * implement atom feed as well as rss
+  * Use Mason for image generation
+  * Share code for mapping between
+    * public\_map
+    * rss dhandler
+    * overlay-db.png
+
+# Configuration #
+
+Change netdisco\_apache\_dir.conf to include
+
+```
+<LocationMatch "/netdisco/.*\.(html|rss|xml)$">
+        SetHandler perl-script
+        PerlHandler netdisco::Mason
+</LocationMatch>
+
+<LocationMatch "/netdisco/maps/overlay.*\.png">
+        SetHandler cgi-script
+</LocationMatch>
+```
+
+(You may also need `Options +ExecCGI` in the `overlay.*.png` block)

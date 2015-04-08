@@ -1,0 +1,151 @@
+# Introduction #
+
+For IETF 65, we used the CiscoRTTMonEchoICMP probe to great effect.
+Since we were going to use Junipers for IETF 67, I wrote this probe.
+
+
+# Details #
+
+In retrospect, I probably wouldn't have used basevars as a base probe.
+Since SNMP\_Session.pm doesn't have an asynchronous mode, an unresponsive
+router can blow the probe time budget.  On the other hand, I didn't want to
+hammer a single device with multiple SNMP sets at once.
+
+# Installation #
+
+The code is at http://pupu.googlecode.com/svn/trunk/smokeping-disman/
+
+Install pingMIB.pm in smokeping's lib/Smokeping/ directory (the presence of ciscoRttMonMIB.pm will tell you it's the right place).
+
+Install DismanPing.pm in smokeping's lib/Smokeping/probes/ directory (the presence of !CiscoRTTMonEchoICMP.pm will tell you it's the right place.)
+
+Configure a probe.  Run smokeping --man Smokeping::probes::DismanPing or see below.
+
+
+**Caution**: this version may have verbose debugging!  While it's what we ran in production at IETF 67, it was also under active development at the time.
+
+## NAME ##
+
+Smokeping::probes::DismanPing - DISMAN-PING-MIB Probe for SmokePing
+
+
+## SYNOPSIS ##
+
+
+```
+ *** Probes ***
+
+ +DismanPing
+
+ offset = 50%
+ pings = 15
+ step = 300
+
+ # The following variables can be overridden in each target section
+ ownerindex = smokeping
+ packetsize = 56
+ pinghost = pinger@router.example.com # mandatory
+ pingsrc = 192.0.2.9
+
+ # [...]
+
+ *** Targets ***
+
+ probe = DismanPing # if this should be the default probe
+
+ # [...]
+
+ + mytarget
+ # probe = DismanPing # if the default probe is something else
+ host = my.host
+ ownerindex = smokeping
+ packetsize = 56
+ pinghost = pinger@router.example.com # mandatory
+ pingsrc = 192.0.2.9
+```
+
+## DESCRIPTION ##
+
+Uses the DISMAN-PING-MIB to cause a remote system to send probes.
+
+
+## VARIABLES ##
+
+Supported probe-specific variables:
+
+  * **offset**: If you run many probes concurrently you may want to prevent them from hitting your network all at the same time. Using the probe-specific offset parameter you can change the point in time when each probe will be run. Offset is specified in % of total interval, or alternatively as 'random', and the offset from the 'General' section is used if nothing is specified here. Note that this does NOT influence the rrds itself, it is just a matter of when data acqusition is initiated. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
+
+> Example value: 50%
+
+  * **pings**: How many pings should be sent to each target. Note that the maximum value for DismanPing is 15, which is less than the SmokePing default, so this class has its own default value. If your Database section specifies a value less than 15, you must also set it for this probe. Note that the number of pings in the RRD files is fixed when they are originally generated, and if you change this parameter afterwards, you'll have to delete the old RRD files or somehow convert them.
+
+> Example value: 15
+
+> Default value: 15
+
+  * **step**: Duration of the base interval that this probe should use, if different from the one specified in the 'Database' section. Note that the step in the RRD files is fixed when they are originally generated, and if you change the step parameter afterwards, you'll have to delete the old RRD files or somehow convert them. (This variable is only applicable if the variable 'concurrentprobes' is set in the 'General' section.)
+
+> Example value: 300
+
+Supported target-specific variables:
+
+  * **ownerindex**: The SNMP OwnerIndex to use when setting up the test. When using VACM, can map to a Security Name or Group Name of the entity running the test.
+
+> Example value: smokeping
+
+  * **packetsize**: The packetsize parameter lets you configure the packet size for the pings sent. The minimum is 8, the maximum 65507. Use the same number as with fping if you want the same packet sizes being used on the network.
+
+> Default value: 56
+
+  * **pinghost**: The (mandatory) pinghost parameter specifies the remote system which will execute the pings, as well as the SNMP community string on the device.
+
+> Example value: pinger@router.example.com
+
+> This setting is mandatory.
+
+  * **pingsrc**: The (optional) pingsrc parameter specifies the source address to be used for pings. If specified, this parameter must identify an IP address assigned to pinghost.
+
+> Example value: 192.0.2.9
+
+
+## AUTHORS ##
+
+Bill Fenner <fenner@research.att.com>
+
+
+## NOTES ##
+
+
+### MENU NAMES ###
+
+This probe uses the menu name of a test as part of the unique index. If the menu name is longer than 32 characters, the last 32 characters are used for the index. Collisions are **'''not'''** detected and simply cause one test's results to be used for all colliding names.
+
+
+### CONFIGURATION ###
+
+This probe requires read/write access to the pingCtlTable. It also requires read-only access to the pingResultsTable and the pingHistoryTable. The DISMAN-PING-MIB is structured such that it is possible to restrict by pingCtlOwnerIndex. This probe uses a pingCtlOwnerIndex of "smokeping" by default; use '''ownerindex''' to configure this if needed.
+
+
+### SAMPLE JUNOS CONFIGURATION ###
+
+This configuration permits the community "pinger" read-write access to the full DISMAN-PING-MIB, but only when sourced from the manager at '''192.0.2.134'''.
+
+
+```
+    snmp {
+        view pingMIB {
+            oid .1.3.6.1.2.1.80 include;
+        }
+        community pinger {
+            view pingMIB;   
+            authorization read-write;
+            clients {
+                192.0.2.134/32;
+            }
+        }
+    }
+```
+
+### SAMPLE CONFIGURATIONS NOTE ###
+
+This configuration allows the "pinger" community full access to the DISMAN-PING-MIB. There is information in the description of '''pingCtlOwnerIndex''' in RFC 4560 (http://tools.ietf.org/html/rfc4560) about using the vacmViewTreeFamilyTable to further restrict access. The author has not tried this method.
