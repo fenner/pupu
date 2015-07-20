@@ -5,13 +5,13 @@ IMPORTS
 	OBJECT-TYPE,
 	Integer32, enterprises
 		FROM SNMPv2-SMI
+	DisplayString
+		FROM SNMPv2-TC
 	;
-
-public OBJECT IDENTIFIER ::= { enterprises 21695 1 }
 
 dhcpdSnmp MODULE-IDENTITY
 	LAST-UPDATED
-		"200601260000Z"
+		"201309030000Z"
 	ORGANIZATION
 		"net-track GmbH"
 	CONTACT-INFO
@@ -27,10 +27,17 @@ dhcpdSnmp MODULE-IDENTITY
 	DESCRIPTION
 		"Management Information for the dhcpd-snmp extension."
 	REVISION
+		"201309030000Z"
+	DESCRIPTION
+		"Patched by Chuck Anderson for additional columns - see
+		https://lists.isc.org/pipermail/dhcp-users/2014-March/017693.html"
+	REVISION
 		"200601260000Z"
 	DESCRIPTION
 		"Initial version of this MIB module."
 	::= { public 2 }
+
+public OBJECT IDENTIFIER ::= { enterprises 21695 1 }
 
 dhcpdSnmpPools OBJECT-TYPE
 	SYNTAX		Integer32
