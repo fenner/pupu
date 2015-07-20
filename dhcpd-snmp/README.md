@@ -30,3 +30,9 @@ on NETTRACK-MIB.
 ## The Cacti Configuration
 
 We need the xml, etc. files to commit here.
+
+## Nagios integration
+
+[The nagios check script](check_dhcp_pools.sh) is just modified to get
+credentials from /etc/snmp/snmpd.conf instead of passing a v2 community
+on the command line.
