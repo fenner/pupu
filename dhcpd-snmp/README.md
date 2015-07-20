@@ -10,7 +10,7 @@ by Bjoern and Bill.
 
 ## The script
 
-[The script](dhcpd-snmp) is running on services-1 and 2.
+[The script](snmpd/dhcpd-snmp) is running on services-1 and 2.
 The net-snmp configuration to include it is straightforward:
 
     pass_persist .1.3.6.1.4.1.21695.1.2 /usr/local/etc/snmp/dhcpd-snmp
@@ -63,7 +63,7 @@ You can then also use PING\n or getnext\n\n, or even get\nOID\n to test it.
 The "MIB" came from the first original copy wej apparently still had in
 his home directory from the nettrack website which no longer exists (we assume; wej?).
 
-Sadly, [the MIB](nettrack-dhcpd-snmp.mib) is not structured per SMIv2.  The table has
+Sadly, [the MIB](mib/nettrack-dhcpd-snmp.mib) is not structured per SMIv2.  The table has
 no Entry underneath it, so tools like "snmptable" do not
 recognize it as a table.
 
@@ -78,6 +78,6 @@ The cacti template is yet to be properly exported.
 
 ## Nagios integration
 
-[The nagios check script](check_dhcp_pools.sh) is just modified to get
+[The nagios check script](nagios/check_dhcp_pools.sh) is just modified to get
 credentials from /etc/snmp/snmpd.conf instead of passing a v2 community
 on the command line.
