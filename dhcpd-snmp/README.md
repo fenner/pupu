@@ -29,7 +29,9 @@ on NETTRACK-MIB.
 
 ## The Cacti Configuration
 
-We need the xml, etc. files to commit here.
+[The cacti query file](cacti/dhcpd-snmp.xml) goes in `resource/snmp_queries/dhcpd-snmp.xml`.
+
+The cacti template is yet to be properly exported.
 
 ## Nagios integration
 

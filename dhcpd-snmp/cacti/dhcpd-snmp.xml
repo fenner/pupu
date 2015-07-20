@@ -1,0 +1,55 @@
+<interface>
+   <name>Get DHCP pools</name>
+   <description>Queries a host for a list of monitorable DHCP-pools</description>
+   <oid_index>.1.3.6.1.4.1.21695.1.2.2.1</oid_index>
+   <oid_num_indexes>.1.3.6.1.4.1.21695.1.2.1</oid_num_indexes>
+   <fields>
+      <dhcpdSnmpPoolIndex>
+         <name>The index for each address pool</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>input</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.1</oid>
+      </dhcpdSnmpPoolIndex>
+
+      <dhcpdSnmpPoolDescription>
+         <name>Holds a textual description of the current pool</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>input</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.2</oid>
+      </dhcpdSnmpPoolDescription>
+
+      <dhcpdSnmpPoolSize>
+         <name>Number of addresses in the pool</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>output</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.3</oid>
+      </dhcpdSnmpPoolSize>
+
+      <dhcpdSnmpPoolActiveLeases>
+         <name>Active leases.</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>output</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.4</oid>
+      </dhcpdSnmpPoolActiveLeases>
+
+      <dhcpdSnmpPoolExpiredLeases>
+         <name>Expired leases.</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>output</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.5</oid>
+      </dhcpdSnmpPoolExpiredLeases>
+
+      <dhcpdSnmpPoolAvailableAddresses>
+         <name>Available addresses.</name>
+         <method>walk</method>
+         <source>value</source>
+         <direction>output</direction>
+         <oid>.1.3.6.1.4.1.21695.1.2.2.6</oid>
+      </dhcpdSnmpPoolAvailableAddresses>
+   </fields>
+</interface>
