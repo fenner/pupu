@@ -1,0 +1,191 @@
+NETTRACK-DHCPD-SNMP-MIB DEFINITIONS ::= BEGIN
+
+IMPORTS
+	MODULE-IDENTITY,
+	OBJECT-TYPE,
+	Integer32, enterprises
+		FROM SNMPv2-SMI
+	;
+
+public OBJECT IDENTIFIER ::= { enterprises 21695 1 }
+
+dhcpdSnmp MODULE-IDENTITY
+	LAST-UPDATED
+		"200601260000Z"
+	ORGANIZATION
+		"net-track GmbH"
+	CONTACT-INFO
+		"net-track GmbH
+		Route des Arsenaux 15
+		1700 Fribourg
+		Switzerland
+		Tel: +41 26 4240924
+		Fax: +41 26 4240924
+
+		http://www.net-track.ch
+		info@net-track.ch"
+	DESCRIPTION
+		"Management Information for the dhcpd-snmp extension."
+	REVISION
+		"200601260000Z"
+	DESCRIPTION
+		"Initial version of this MIB module."
+	::= { public 2 }
+
+dhcpdSnmpPools OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Number of address pools configured for monitoring."
+	::= { dhcpdSnmp 1 }
+
+dhcpdSnmpPoolTable OBJECT-TYPE
+	SYNTAX		SEQUENCE OF DhcpdSnmpPoolEntry
+	MAX-ACCESS	not-accessible
+	STATUS		current
+	DESCRIPTION
+		"This table holds the attributes of each configured
+		 address pool."
+	::= { dhcpdSnmp 2 }
+
+DhcpdSnmpPoolEntry ::= SEQUENCE {
+dhcpdSnmpPoolIndex		Integer32,
+dhcpdSnmpPoolDescription	DisplayString,
+dhcpdSnmpPoolSize		Integer32,
+dhcpdSnmpPoolActiveLeases	Integer32,
+dhcpdSnmpPoolExpiredLeases	Integer32,
+dhcpdSnmpPoolAvailableAddresses	Integer32,
+dhcpdSnmpPoolActiveAddresses	Integer32,
+dhcpdSnmpPoolFreeAddresses	Integer32,
+dhcpdSnmpPoolBackupAddresses	Integer32,
+dhcpdSnmpPoolReleasedAddresses	Integer32,
+dhcpdSnmpPoolExpiredAddresses	Integer32,
+dhcpdSnmpPoolAbandonedAddresses	Integer32
+}
+
+dhcpdSnmpPoolIndex OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"The index for each address pool."
+	::= { dhcpdSnmpPoolTable 1 }
+
+dhcpdSnmpPoolDescription OBJECT-TYPE
+	SYNTAX		DisplayString
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Holds a textual description of the current pool."
+	::= { dhcpdSnmpPoolTable 2 }
+
+dhcpdSnmpPoolSize OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Number of addresses in the pool."
+	::= { dhcpdSnmpPoolTable 3 }
+
+dhcpdSnmpPoolActiveLeases OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Active leases."
+	::= { dhcpdSnmpPoolTable 4 }
+
+dhcpdSnmpPoolExpiredLeases OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Expired leases."
+	::= { dhcpdSnmpPoolTable 5 }
+
+dhcpdSnmpPoolAvailableAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Available addresses."
+	::= { dhcpdSnmpPoolTable 6 }
+
+dhcpdSnmpPoolActiveAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'active'.  This is a count of
+	IP addresses in the pool that are present in the lease
+	database and whose binding state is 'active'.  This should be
+	the same as dhcpdSnmpPoolActiveLeases."
+	::= { dhcpdSnmpPoolTable 7 }
+
+dhcpdSnmpPoolFreeAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'free'.  This is a count of
+	IP addresses in the pool that are present in the lease
+	database and whose binding state is 'free'.  For DHCP
+	Failover, this represents IP addresses that are available for
+	assignment by the Primary DHCP server."
+	::= { dhcpdSnmpPoolTable 8 }
+
+dhcpdSnmpPoolBackupAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'backup'.  This is a count of
+	IP addresses in the pool that are present in the lease
+	database and whose binding state is 'backup'.  For DHCP
+	Failover, this represents IP addresses that are available for
+	assignment by the Secondary DHCP server."
+	::= { dhcpdSnmpPoolTable 9 }
+
+dhcpdSnmpPoolReleasedAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'released'.  This is a count
+	of IP addresses in the pool that are present in the lease
+	database and whose binding state is 'released'.  This
+	represents IP addresses that were released by DHCP clients
+	sending DHCPRELEASE messages to the server.  Leases do not
+	remain in this state--they eventually transition to 'free' or
+	'backup'."
+	::= { dhcpdSnmpPoolTable 10 }
+
+dhcpdSnmpPoolExpiredAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'expired'.  This is a count
+	of IP addresses in the pool that are present in the lease
+	database and whose binding state is 'expired'.  Leases do not
+	remain in this state--they eventually transition to 'free' or
+	'backup'."
+	::= { dhcpdSnmpPoolTable 11 }
+
+dhcpdSnmpPoolAbandonedAddresses OBJECT-TYPE
+	SYNTAX		Integer32
+	MAX-ACCESS	read-only
+	STATUS		current
+	DESCRIPTION
+		"Leases in binding state 'abandoned'.  This is a count
+	of IP addresses in the pool that are present in the lease
+	database and whose binding state is 'abandoned'.  This occurs
+	if a DHCP client sends a DHCPDECLINE message or if the DHCP
+	server receives an ICMP Echo response before the address is
+	leased to the client and could indicate that another client is
+	already using the address.  Leases in this state may
+	eventually transition to 'free' or 'backup'."
+	::= { dhcpdSnmpPoolTable 12 }
+
+END

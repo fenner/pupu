@@ -1,0 +1,495 @@
+#!/usr/bin/perl
+# --------------------------------------------------------------------
+# Copyright (C) 2006 Oliver Hitz <oliver@net-track.ch>
+#
+# $Id: dhcpd-snmp.in,v 1.2 2006/01/25 19:26:00 oli Exp $
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston,
+# MA 02111-1307, USA.
+# --------------------------------------------------------------------
+# UPDATED BASED ON
+# https://lists.isc.org/pipermail/dhcp-users/2014-March/017693.html
+# --------------------------------------------------------------------
+# dhcpd-snmp
+#
+# An extension for polling the active and available lease counts of a
+# running dhcpd.
+#
+# Please read the man page dhcpd-snmp(8) for instructions.
+# --------------------------------------------------------------------
+
+use Time::Local;
+use strict;
+
+# The base OID of this extension. Has to match the OID in snmpd.conf:
+my $baseoid = ".1.3.6.1.4.1.21695.1.2";
+
+# Results are cached for some seconds so that an SNMP walk doesn't
+# result in dhcpd.leases being parsed multiple times.
+my $cache_secs = 60;
+
+# --------------------------------------------------------------------
+
+my $mib;
+my $mibtime;
+
+# Load configuration file
+#my $conf = read_configuration($ARGV[0]);
+my $conf = read_configuration("/usr/local/etc/snmp/dhcpd-snmp.conf");
+
+# Switch on autoflush
+$| = 1;
+
+# Main loop
+while (my $cmd = <STDIN>) {
+  chomp $cmd;
+
+  if ($cmd eq "PING") {
+    print "PONG\n";
+  } elsif ($cmd eq "get") {
+    my $oid_in = <STDIN>;
+
+    my $oid = get_oid($oid_in);
+    my $mib = create_dhcp_mib();
+
+    if ($oid != 0 && defined($mib->{$oid})) {
+      print "$baseoid.$oid\n";
+      print $mib->{$oid}[0]."\n";
+      print $mib->{$oid}[1]."\n";
+    } else {
+      print "NONE\n";
+    }
+  } elsif ($cmd eq "getnext") {
+    my $oid_in = <STDIN>;
+
+    my $oid = get_oid($oid_in);
+    my $found = 0;
+
+    my $mib = create_dhcp_mib();
+    my @s = sort { oidcmp($a, $b) } keys %{ $mib };
+    for (my $i = 0; $i < @s; $i++) {
+      if (oidcmp($oid, $s[$i]) == -1) {
+	print "$baseoid.".$s[$i]."\n";
+	print $mib->{$s[$i]}[0]."\n";
+	print $mib->{$s[$i]}[1]."\n";
+	$found = 1;
+	last;
+      }
+    }
+    if (!$found) {
+     print "NONE\n";
+    }
+  } else {
+    # Unknown command
+  }
+}
+
+exit 0;
+
+sub get_oid
+{
+
+  my ($oid) = @_;
+  chomp $oid;
+
+  my $base = $baseoid;
+  $base =~ s/\./\\./g;
+
+  if ($oid !~ /^$base(\.|$)/) {
+    # Requested oid doesn't match base oid
+    return 0;
+  }
+
+  $oid =~ s/^$base\.?//;
+  return $oid;
+}
+
+sub oidcmp {
+  my ($x, $y) = @_;
+
+  my @a = split /\./, $x;
+  my @b = split /\./, $y;
+
+  my $i = 0;
+
+  while (1) {
+
+    if ($i > $#a) {
+      if ($i > $#b) {
+	return 0;
+      } else {
+	return -1;
+      }
+    } elsif ($i > $#b) {
+      return 1;
+    }
+
+    if ($a[$i] < $b[$i]) {
+      return -1;
+    } elsif ($a[$i] > $b[$i]) {
+      return 1;
+    }
+
+    $i++;
+  }
+}
+
+sub create_dhcp_mib
+{
+  # We cache the results for $cache_secs seconds
+  if (time - $mibtime < $cache_secs) {
+    return $mib;
+  }
+
+  # Read in all leases
+  read_leases();
+
+  my %dhcp = (
+	      "1" => [ "integer", 0 ],	# Number of pools
+	     );
+
+  foreach my $i (keys %{ $conf->{"pools"} }) {
+    $dhcp{"1"}[1]++;
+
+    my $pool = $conf->{"pools"}->{$i};
+
+    $dhcp{"2.1.".$i} = [ "integer", $i ];
+    $dhcp{"2.2.".$i} = [ "string", $pool->{"name"} ];
+    $dhcp{"2.3.".$i} = [ "integer", $pool->{"total"} ];
+    $dhcp{"2.4.".$i} = [ "integer", $pool->{"active"} ];
+    $dhcp{"2.5.".$i} = [ "integer", $pool->{"expired"} ];
+    $dhcp{"2.6.".$i} = [ "integer", $pool->{"total"} - $pool->{"active"} ];
+    $dhcp{"2.7.".$i} = [ "integer", $pool->{"bs_active"} ];
+    $dhcp{"2.8.".$i} = [ "integer", $pool->{"bs_free"} ];
+    $dhcp{"2.9.".$i} = [ "integer", $pool->{"bs_backup"} ];
+    $dhcp{"2.10.".$i} = [ "integer", $pool->{"bs_released"} ];
+    $dhcp{"2.11.".$i} = [ "integer", $pool->{"bs_expired"} ];
+    $dhcp{"2.12.".$i} = [ "integer", $pool->{"bs_abandoned"} ];
+  }
+
+  $mib = \%dhcp;
+  $mibtime = time;
+  return $mib;
+}
+
+sub ip2int {
+  my ($ip) = @_;
+
+  if ($ip =~ /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/) {
+    return 256*(256*(256*$1+$2)+$3)+$4;
+  } else {
+    return -1;
+  }
+}
+
+sub read_leases
+{
+  # Clear leases
+  foreach my $i (keys %{ $conf->{"pools"} }) {
+    $conf->{"pools"}->{$i}->{"leases"} = ();
+    $conf->{"pools"}->{$i}->{"active"} = 0;
+    $conf->{"pools"}->{$i}->{"expired"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_abandoned"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_active"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_backup"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_expired"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_free"} = 0;
+    $conf->{"pools"}->{$i}->{"bs_released"} = 0;
+  }
+
+  # Read leases
+  if (!open(LEASES, $conf->{"leases"})) {
+    printf STDERR "Unable to open leases file '%s'!\n", $conf->{leases};
+    return;
+  }
+
+  my %l = undef;
+
+  while (my $line = <LEASES>) {
+    if ($line =~ /^lease (\d+\.\d+\.\d+\.\d+) \{$/) {
+      my $ip = ip2int($1);
+      undef %l;
+
+      foreach my $i (keys %{ $conf->{"pools"} }) {
+	my $pool = $conf->{"pools"}->{$i};
+	my $found = 0;
+
+	foreach my $r (@{ $pool->{"ranges"} }) {
+	  if (($ip >= $r->{"from"}) && ($ip <= $r->{"to"})) {
+	    %l = ( "pool" => $i, "ip" => $ip );
+	    $found = 1;
+	    last;
+	  }
+	}
+	if ($found) {
+	  last;
+	}
+      }
+    } elsif ($line =~ /^\s+ends \d (\d+)\/(\d+)\/(\d+) (\d+):(\d+):(\d+);$/) {
+      $l{"ends"} = timegm($6, $5, $4, $3, $2-1, $1);
+    } elsif ($line =~ /^\s+ends never;$/) {
+      $l{"ends"} = -1;
+    } elsif ($line =~ /^\s+binding state (.*);$/) {
+      $l{"state"} = $1;
+    } elsif ($line =~ /^\}$/) {
+	# Given the last lease entry in the leases file "wins"
+	# and we do hash by the leases IP address, this will be fine.
+      $conf->{"pools"}->{$l{"pool"}}->{"leases"}->{$l{"ip"}}->{"ends"} = $l{"ends"};
+      $conf->{"pools"}->{$l{"pool"}}->{"leases"}->{$l{"ip"}}->{"state"} = $l{"state"};
+    }
+  }
+
+  close(LEASES);
+
+  # Count active and expired leases
+  my $now = time();
+
+  foreach my $i (keys %{ $conf->{"pools"} }) {
+    my $pool = $conf->{"pools"}->{$i};
+
+    foreach my $ip (keys %{ $pool->{"leases"} }) {
+      my $end = $pool->{"leases"}->{$ip}->{"ends"};
+      my $state = $pool->{"leases"}->{$ip}->{"state"};
+      if ($state eq 'active' && (($end == -1) || ($end >= $now))) {
+	$pool->{"active"}++;
+      } else {
+	$pool->{"expired"}++;
+      }
+      if ($state eq 'abandoned') {
+	  $pool->{"bs_abandoned"}++;
+      } elsif ($state eq 'active') {
+	  $pool->{"bs_active"}++;
+      } elsif ($state eq 'backup') {
+	  $pool->{"bs_backup"}++;
+      } elsif ($state eq 'expired') {
+	  $pool->{"bs_expired"}++;
+      } elsif ($state eq 'free') {
+	  $pool->{"bs_free"}++;
+      } elsif ($state eq 'released') {
+	  $pool->{"bs_released"}++;
+      }
+    }
+  }
+}
+
+sub read_configuration
+{
+  my ($f) = @_;
+
+  my %conf = ( "leases" => undef,
+	       "pools" => { } );
+
+  open C, "$f";
+  while (my $l = <C>) {
+    $l =~ s/#.*//;
+    $l =~ s/^\s*//;
+    $l =~ s/\s*$//;
+    
+    if ($l eq "") {
+      next;
+    }
+
+    if ($l =~ /^leases:\s*(\S+)$/) {
+
+      $conf{"leases"} = $1;
+
+      # Check if file is readable
+      if (open(LEASES, $conf{"leases"})) {
+	close(LEASES);
+      } else {
+	printf STDERR "Unable to open leases file '%s'!\n", $conf{"leases"};
+      }
+
+    } elsif ($l =~ /^pool:\s*(\d+)\s*,\s*("[^"]*"|[^"][^,]*)\s*,\s*(.*)$/) {
+
+      # Read the pool definition
+      my %p = ( "index" => $1,
+		"name" => $2,
+		"ranges" => [ ],
+	        "total" => 0,
+		"leases" => { } );
+
+      my @ranges = split /\s*,\s*/, $3;
+
+      $p{"name"} =~ s/^\"//;
+      $p{"name"} =~ s/\"$//;
+
+      foreach my $r (@ranges) {
+	if ($r !~ /^(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})-(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/) {
+	  printf STDERR "Invalid range definition '%s'.\n", $r;
+	  next;
+	}
+
+	my ($from, $to) = ($1, $2);
+
+	my $fromip = ip2int($from);
+	my $toip = ip2int($to);
+
+	if ($toip < $fromip) {
+	  my $t = $toip;
+	  $toip = $fromip;
+	  $fromip = $t;
+	}
+
+	$p{"total"} += $toip-$fromip+1;
+
+	my %range = ( "from" => $fromip,
+		      "to" => $toip );
+
+	push @{ $p{"ranges"} }, \%range;
+      }
+
+      $conf{"pools"}{$p{"index"}} = \%p;
+    } else {
+
+      printf STDERR "Invalid line '%s'.\n", $l;
+
+    }
+  }
+
+  return \%conf;
+}
+
+__END__
+
+=head1 NAME
+
+dhcpd-snmp
+
+=head1 SYNOPSIS
+
+dhcpd-snmp dhcpd-snmp.conf
+
+=head1 DESCRIPTION
+
+B<dhcpd-snmp> is an extension for the Net-SNMP agent and the ISC DHCP
+server. It allows you to monitor and track the address usage of your
+dynamic IP address pools through SNMP.
+
+=head1 CONFIGURATION FILE
+
+The configuration file defines the location of the F<dhcpd.leases>
+file as well as the pools of which you want to access the lease
+counts.
+
+The file is in B<key: value> format and allows only two keys:
+
+=over 8
+
+=item B<leases>: C</var/lib/dhcp3/dhcpd.leases>
+
+Location of the F<dhcpd.leases> file. This file needs to be accessible
+by the script.
+
+=item B<pool>: C<index>, C<description>, C<ip1-ip2, ip3-ip4...>
+
+Defines a pool to monitor. C<index> is a unique numeric index,
+C<description> a textual description of this pool, and C<ip1-ip2,
+ip3-ip4, ...> defines the ranges of IP addresses belonging to this
+pool.
+
+=back
+
+Since this extension is a persistent script, changes to the
+configuration file require a restart of snmpd.
+
+=head1 INSTALLATION
+
+After installing the B<dhcpd-snmp> script and adapting the
+configuration file, it is best to test it manually. This can be done
+with the following dialog:
+
+  PING
+
+The script should return "PONG".
+
+  get
+  .1.3.6.1.4.1.21695.1.2.1
+
+The script should return three lines: the OID, "integer", and the
+number of configured pools.
+
+  get
+  .1.3.6.1.4.1.21695.1.2.2.2.1
+
+OID, "string", and the name of your first address pool.
+
+  get
+  .1.3.6.1.4.1.21695.1.2.2.4.1
+
+OID, "integer", and the number of active leases.
+
+Quit the dialog using CTRL-D.
+
+If everything works, insert the following line into your Net-SNMP's
+B<snmpd.conf> configuration file:
+
+  pass_persist .1.3.6.1.4.1.21695.1.2 path/to/dhcpd-snmp path/to/dhcpd-snmp.conf
+
+Net-SNMP will need to be restarted after this change.
+
+You should now be able to get the statistics using F<snmpwalk>, for example:
+
+  $ snmpwalk host community .1.3.6.1.4.1.21695.1.2
+
+This should give you a list of the statistics of your DHCP server.
+
+=head1 MIB
+
+The script returns the following variables:
+
+  .1.3.6.1.4.1.21695.1.2.1: number of configured pools
+  .1.3.6.1.4.1.21695.1.2.2.<pool>: pool description
+  .1.3.6.1.4.1.21695.1.2.3.<pool>: size of the pool (number of addresses)
+  .1.3.6.1.4.1.21695.1.2.4.<pool>: active leases
+  .1.3.6.1.4.1.21695.1.2.5.<pool>: expired leases
+  .1.3.6.1.4.1.21695.1.2.6.<pool>: available addresses (size - active leases)
+  .1.3.6.1.4.1.21695.1.2.7.<pool>: count of leases in binding state active
+  .1.3.6.1.4.1.21695.1.2.8.<pool>: count of leases in binding state free
+  .1.3.6.1.4.1.21695.1.2.9.<pool>: count of leases in binding state backup
+  .1.3.6.1.4.1.21695.1.2.10.<pool>: count of leases in binding state released
+  .1.3.6.1.4.1.21695.1.2.11.<pool>: count of leases in binding state expired
+  .1.3.6.1.4.1.21695.1.2.12.<pool>: count of leases in binding state abandoned
+
+
+For a complete MIB file see the C<mibs> directory in the source archive.
+
+=head1 SECURITY
+
+It is assumed that users of this script know how to properly secure
+their snmpd. Please read the corresponding man pages on more
+information about this.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2006 Oliver Hitz
+Copyright (C) 2013 Charles R. Anderson
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
+USA.
+
+=cut
