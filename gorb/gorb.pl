@@ -1,4 +1,4 @@
-#!/usr/bin/perl -Tw
+#!/usr/bin/perl -w -I /home/cacti/perl5/lib/perl5
 #
 # Copyright 2007 VeriLAN Event Services, Inc.
 # All rights reserved.
@@ -25,7 +25,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# $Id$
+# similar to the "old" gorb.pl but determines which access points to query
+# by extracting them from the netdisco database
 
 use strict;
 use Net::SNMP qw(:snmp);
@@ -33,12 +34,12 @@ use Net::SNMP qw(:snmp);
 sub client_rates($);
 
 our $cDot11ClientDataRateSet = '1.3.6.1.4.1.9.9.273.1.2.1.1.11.1';
-#my @hosts = ('ap01', 'ap02');
-my @hosts = map { "130.129.1.$_" } (101 .. 190);
-push (@hosts, map { "130.129.1.$_" } (202,203,207 .. 216));
+
+my @hosts = `/usr/local/bin/mysql -u cactiuser --password='dietcoke' --skip-column-names  -e 'SELECT description FROM host WHERE description LIKE "ap%" && status LIKE "3"' cacti93`;
 
 for my $host (@hosts) {
-    print "$host\n";
+    $host =~ s/\n//g;
+#    print "$host\n";
     client_rates($host);
 }
 
@@ -62,6 +63,8 @@ sub client_rates ($) {
 	#printf("ERROR: %s.\n", $error);
 	exit 1;
     }
+    # Don't let Net::SNMP translate strings to 0xFOOO
+    $session->translate(0);
     my $result = $session->get_bulk_request(
 	-callback       => [\&table_cb, {}],
 	-maxrepetitions => 2,
@@ -115,22 +118,18 @@ sub table_cb {
 	    # We are no longer in the table, so print the results.
 	    my %rate_count;
 	    foreach my $oid (oid_lex_sort(keys(%{$table}))) {
-		#printf("%s => %s\n", $oid, $table->{$oid});
-		# parse this info
-		if($table->{$oid} =~ /^0x([\d\w]+)/) {
-		    #print "$1\n";
-		    my $len = length($1);
-		    my $top_rate = 0;
-		    for my $byte (0..($len/2-1)) {
-		        my $str = substr($1, 2*$byte, 2);
-			my $rate = sprintf("%2.1f", hex($str)/2);
-			if ($rate > $top_rate) {
-			    $top_rate = $rate;
-			}
+		my $val = $table->{$oid};
+		my $len = length($val);
+		my $top_rate = 0;
+		for my $byte (0..($len-1)) {
+		    my $str = substr($val, $byte, 1);
+		    my $rate = sprintf("%2.1f", ord($str)/2);
+		    if ($rate > $top_rate) {
+			$top_rate = $rate;
 		    }
-		    $rate_count{$top_rate}++;
-		    #print "top: $top_rate\n";
 		}
+		$rate_count{$top_rate}++;
+		#print "top: $top_rate\n";
 	    }
 	    for my $k (sort keys %rate_count) {
 	        print "rate $k: " . $rate_count{$k} . "\n";
