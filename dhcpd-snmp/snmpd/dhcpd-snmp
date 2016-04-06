@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 # --------------------------------------------------------------------
 # Copyright (C) 2006 Oliver Hitz <oliver@net-track.ch>
 #
@@ -161,22 +161,24 @@ sub create_dhcp_mib
 	     );
 
   foreach my $i (keys %{ $conf->{"pools"} }) {
+    next unless $i;
+
     $dhcp{"1"}[1]++;
 
     my $pool = $conf->{"pools"}->{$i};
 
-    $dhcp{"2.1.".$i} = [ "integer", $i ];
-    $dhcp{"2.2.".$i} = [ "string", $pool->{"name"} ];
-    $dhcp{"2.3.".$i} = [ "integer", $pool->{"total"} ];
-    $dhcp{"2.4.".$i} = [ "integer", $pool->{"active"} ];
-    $dhcp{"2.5.".$i} = [ "integer", $pool->{"expired"} ];
-    $dhcp{"2.6.".$i} = [ "integer", $pool->{"total"} - $pool->{"active"} ];
-    $dhcp{"2.7.".$i} = [ "integer", $pool->{"bs_active"} ];
-    $dhcp{"2.8.".$i} = [ "integer", $pool->{"bs_free"} ];
-    $dhcp{"2.9.".$i} = [ "integer", $pool->{"bs_backup"} ];
-    $dhcp{"2.10.".$i} = [ "integer", $pool->{"bs_released"} ];
-    $dhcp{"2.11.".$i} = [ "integer", $pool->{"bs_expired"} ];
-    $dhcp{"2.12.".$i} = [ "integer", $pool->{"bs_abandoned"} ];
+    #$dhcp{"2.1.1.".$i} = [ "integer", $i ];
+    $dhcp{"2.1.2.".$i} = [ "string", $pool->{"name"} ];
+    $dhcp{"2.1.3.".$i} = [ "integer", $pool->{"total"} ];
+    $dhcp{"2.1.4.".$i} = [ "integer", $pool->{"active"} ];
+    $dhcp{"2.1.5.".$i} = [ "integer", $pool->{"expired"} ];
+    $dhcp{"2.1.6.".$i} = [ "integer", $pool->{"total"} - $pool->{"active"} ];
+    $dhcp{"2.1.7.".$i} = [ "integer", $pool->{"bs_active"} ];
+    $dhcp{"2.1.8.".$i} = [ "integer", $pool->{"bs_free"} ];
+    $dhcp{"2.1.9.".$i} = [ "integer", $pool->{"bs_backup"} ];
+    $dhcp{"2.1.10.".$i} = [ "integer", $pool->{"bs_released"} ];
+    $dhcp{"2.1.11.".$i} = [ "integer", $pool->{"bs_expired"} ];
+    $dhcp{"2.1.12.".$i} = [ "integer", $pool->{"bs_abandoned"} ];
   }
 
   $mib = \%dhcp;
