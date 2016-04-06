@@ -6,7 +6,9 @@ They second and currently based upon version came from
 https://github.com/spions/cacti_isc_dhcp.git
 and patched based on a mailing list post
 https://lists.isc.org/pipermail/dhcp-users/2014-March/017693.html
-by Bjoern and Bill.
+by Bjoern and Bill.  [This repository](https://github.com/ohitz/dhcpd-snmp)
+is owned by a user whose name matches the one in the comments in
+the script, but does not have the patches or the MIB.
 
 ## The script
 
