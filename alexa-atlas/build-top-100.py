@@ -26,4 +26,5 @@ while ( len( targets[ 'v4' ] ) < 100 or
 	    print "No %s for %s (#%s)." % ( af, site, rank )
 
 import pprint
-pprint.pprint( targets )
+f = open( "targets.txt", "w" )
+pprint.pprint( targets, stream=f )
