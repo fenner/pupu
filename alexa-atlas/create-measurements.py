@@ -11,6 +11,7 @@ api_key = file( 'API_KEY' ).read().strip()
 
 targets = eval( file( 'targets.txt' ).read() )
 
+# Note: Probe 1114 is the one that travels with the traveling IETF kit.
 ourProbe = ripe.atlas.cousteau.AtlasSource( type="probes", value="1114", requested=1 )
 
 pings = []
@@ -19,7 +20,10 @@ for af in ( 4, 6 ):
     # Bill isn't allowed to run more than 100 concurrent measurements.
     for i in range( 50 ):
         target = targetList[ i ]
-        # TODO: if there is an existing measurement
+        # TODO: skip if there is an existing measurement for this destination
+        # TODO: use the hostname as the target, and resolve_on_probe=True.
+        #       This allows us to let the probe do the CDN-relevant lookup
+        #       using local name servers, if any.
 	pings.append( ripe.atlas.cousteau.Ping( af=af, target=target[1], description='%s Alexa #%d: %s' % ( meeting, i + 1, target[ 0 ] ) ) )
 
 atlas_request = ripe.atlas.cousteau.AtlasCreateRequest(
@@ -28,7 +32,8 @@ atlas_request = ripe.atlas.cousteau.AtlasCreateRequest(
     key=api_key,
     measurements=pings,
     sources=[ourProbe],
-    is_oneoff=False
+    is_oneoff=False,
+    bill_to="jim@daedelus.com"
 )
 
 (is_success, response) = atlas_request.create()
